@@ -15,7 +15,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
                     flex \
                     g++ \
                     git \
-                    python \
+                    python3 \
                     vim \
                     pkg-config -yqq
 

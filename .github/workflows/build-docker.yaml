@@ -21,6 +21,7 @@ jobs:
           
           echo "Build Date: ${{ env.BUILD_DATE }}"
           echo "Version: ${{ env.DOCKER_VERSION }}"
+          echo "Current branch name: $(git branch --show-current)"
 
       - name: Build and push
         uses: docker/build-push-action@v4

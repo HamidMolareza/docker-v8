@@ -8,14 +8,25 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      - name: Set build arguments
+        run: |
+          echo "export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+          echo "export DOCKER_VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
+          
+          echo "Build Date: ${{ env.BUILD_DATE }}"
+          echo "Version: ${{ env.DOCKER_VERSION }}"
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: false
           tags: d8:latest
+          build-args:
+            - BUILD_DATE=${{ env.BUILD_DATE }}
+            - DOCKER_VERSION=${{ env.DOCKER_VERSION }}

@@ -27,6 +27,6 @@ jobs:
         with:
           push: false
           tags: d8:latest
-          build-args:
-            - BUILD_DATE=${{ env.BUILD_DATE }}
-            - DOCKER_VERSION=${{ env.DOCKER_VERSION }}
+          build-args: |
+            BUILD_DATE=${{ env.BUILD_DATE }}
+            DOCKER_VERSION=${{ env.DOCKER_VERSION }}

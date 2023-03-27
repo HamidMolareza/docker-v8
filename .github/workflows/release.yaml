@@ -94,9 +94,5 @@ jobs:
           build-args: |
             BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}
-          cache-from: |
-            type=local,src=/tmp/.buildx-cache
-            type=registry,ref=hamidmolareza/d8
-          cache-to: |
-            type=local,dest=/tmp/.buildx-cache
-            type=registry,ref=hamidmolareza/d8
+            
+#     TODO: Add Test

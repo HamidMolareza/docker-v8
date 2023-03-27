@@ -4,9 +4,9 @@
 
 FROM debian:stable-slim as builder
 
-ARG V8_VERSION=latest
-
-RUN apt-get update && apt-get upgrade -yqq
+# Install dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt-get update &&\
+     DEBIAN_FRONTEND=noninteractive apt-get upgrade -yqq
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install bison \
@@ -38,12 +38,17 @@ RUN strip out/x64.release/d8
 # ==============================================================================
 
 FROM debian:stable-slim
+LABEL maintainer="Hamid Molareza <HamidMolareza@gmail.com>"
 
-ARG V8_VERSION=latest
-ENV V8_VERSION=$V8_VERSION
+ARG DOCKER_VERSION
+LABEL org.label-schema.schema-version="$DOCKER_VERSION"
 
-LABEL v8.version=$V8_VERSION \
-      maintainer="andre.burgaud@gmail.com"
+ARG BUILD_DATE
+LABEL org.label-schema.build-date="$BUILD_DATE"
+
+LABEL org.label-schema.name="HamidMolareza/V8"
+LABEL org.label-schema.description="Google V8 docker image"
+LABEL org.label-schema.vcs-url="https://github.com/HamidMolareza/v8-docker"
 
 RUN apt-get update && apt-get upgrade -yqq && \
     DEBIAN_FRONTEND=noninteractive apt-get install curl rlwrap vim -yqq && \

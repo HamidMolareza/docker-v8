@@ -46,7 +46,7 @@ LABEL org.label-schema.schema-version="$DOCKER_VERSION"
 ARG BUILD_DATE
 LABEL org.label-schema.build-date="$BUILD_DATE"
 
-LABEL org.label-schema.name="HamidMolareza/V8"
+LABEL org.label-schema.name="HamidMolareza/d8"
 LABEL org.label-schema.description="Google V8 docker image"
 LABEL org.label-schema.vcs-url="https://github.com/HamidMolareza/v8-docker"
 
@@ -60,10 +60,10 @@ COPY --from=builder /v8/out/x64.release/d8 ./
 
 COPY vimrc /root/.vimrc
 
-COPY entrypoint.sh /
+COPY entrypoint.sh /entrypoint/
 
-RUN chmod +x /entrypoint.sh && \
-    mkdir /examples && \
+# TODO: rewite entrypoint.sh into python
+RUN chmod +x /entrypoint/entrypoint.sh && \
     ln -s /v8/d8 /usr/local/bin/d8
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint/entrypoint.sh"]

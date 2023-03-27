@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "Build Date: ${{ env.BUILD_DATE }}"
           echo "Version: ${{ env.DOCKER_VERSION }}"
-          echo "Current branch name: $(git branch --show-current)"
+          echo "Current branch name: $(git rev-parse --abbrev-ref HEAD)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -33,3 +33,9 @@ jobs:
           build-args: |
             BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}
+          cache-from: |
+            type=local,src=/tmp/.buildx-cache
+            type=custom,reference=HamidMolareza/d8:cache
+          cache-to: |
+            type=local,dest=/tmp/.buildx-cache
+            type=custom,reference=HamidMolareza/d8:cache

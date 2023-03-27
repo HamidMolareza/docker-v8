@@ -2,3 +2,17 @@ LICENSE
 README.md
 examples
 Makefile
+.configs
+.git
+.github
+.idea
+docs
+node_modules
+.pre-commit-config.yaml
+.versionrc.json
+CODEOWNERS
+Makefile
+package.json
+package-lock.json
+README.md
+requirements.py

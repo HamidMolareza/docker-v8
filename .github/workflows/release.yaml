@@ -20,7 +20,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  default:
+  Release-Version:
     runs-on: ubuntu-latest
 
     # Limit branch:
@@ -41,7 +41,7 @@ jobs:
           echo "create_pr_for_branch: ${{ inputs.create_pr_for_branch }}"
           echo "Current Branch: $(git rev-parse --abbrev-ref HEAD)"
 
-      - name: Release
+      - name: Generate Release
         uses: Payadel/release-sv-action@v0.2.1
         id: release
         with:
@@ -58,3 +58,45 @@ jobs:
           allowUpdates: true
           bodyFile: "CHANGELOG.md"
           tag: 'v${{ steps.release.outputs.version }}'
+          
+  Docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set build arguments
+        run: |
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+          echo "DOCKER_VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Print arguments
+        run: |
+          echo "Build Date: ${{ env.BUILD_DATE }}"
+          echo "Version: ${{ env.DOCKER_VERSION }}"
+          echo "Current branch name: $(git rev-parse --abbrev-ref HEAD)"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}  
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: d8:latest
+          build-args: |
+            BUILD_DATE=${{ env.BUILD_DATE }}
+            DOCKER_VERSION=${{ env.DOCKER_VERSION }}
+          cache-from: |
+            type=local,src=/tmp/.buildx-cache
+            type=custom,reference=HamidMolareza/d8:cache
+          cache-to: |
+            type=local,dest=/tmp/.buildx-cache
+            type=custom,reference=HamidMolareza/d8:cache

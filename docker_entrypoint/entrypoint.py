@@ -4,13 +4,14 @@ import os
 
 from on_rails import Result, def_result
 
-from docker_entrypoint._libs.ExitCodes import ExitCode
-from docker_entrypoint._libs.Logger import Logger
-from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from docker_entrypoint._libs.cli_parser import create_cli_parser
 from docker_entrypoint._libs.commands import command_run
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
-from docker_entrypoint._libs.utility import log_result, log_debug_class_properties
+from docker_entrypoint._libs.ExitCodes import ExitCode
+from docker_entrypoint._libs.Logger import Logger
+from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
+from docker_entrypoint._libs.utility import (log_debug_class_properties,
+                                             log_result)
 
 logger = Logger.get(__name__)
 

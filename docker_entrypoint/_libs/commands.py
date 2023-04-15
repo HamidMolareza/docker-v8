@@ -4,8 +4,9 @@ from typing import List, Optional
 
 from on_rails import Result, def_result
 from pylity import Path
-from src._libs.ExitCodes import ExitCode
-from src._libs.ResultDetails.FailResult import FailResult
+
+from docker_entrypoint._libs.ExitCodes import ExitCode
+from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 
 @def_result()

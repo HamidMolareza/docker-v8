@@ -3,7 +3,8 @@ from typing import Optional
 
 from docker_environments import DockerEnvironments
 from on_rails import Result, ValidationError, def_result
-from src._libs.ResultDetails.FailResult import FailResult
+
+from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 D8_Recommended_OPTIONS = {
     '--harmony': 'Enables support for some of the experimental ES6 features that are not yet fully standardized',

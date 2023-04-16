@@ -16,7 +16,7 @@ CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
 
 build:  ## Build the Docker image
 	docker build \
-		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		--build-arg DOCKER_BUILD_DATE=$(BUILD_DATE) \
 		--build-arg DOCKER_VERSION=$(DOCKER_VERSION) \
 		-t $(IMAGE_NAME):$(IMAGE_TAG) .
 

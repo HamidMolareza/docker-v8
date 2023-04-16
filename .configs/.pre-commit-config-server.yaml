@@ -3,3 +3,9 @@ repos:
     rev: v0.5.1
     hooks:
       - id: action-validator
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-toml
+      - id: check-yaml

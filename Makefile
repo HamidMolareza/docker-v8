@@ -1,41 +1,59 @@
-TAG:=9.0.56
-IMAGE:=andreburgaud/d8
+.PHONY: help build push clean update-poetry-dependencies watch-actions release-action changelog-action
 
-default: help
+# Define variables
+IMAGE_NAME = d8
+IMAGE_TAG = latest
+BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+DOCKER_VERSION = $(shell node -p -e "require('./package.json').version")
 
-help:
-	@echo 'V8/D8 ${TAG} Docker image build file'
-	@echo
-	@echo 'Usage:'
-	@echo '    make clean           Delete dangling images and d8 images'
-	@echo '    make build           Build the d8 image using local Dockerfile'
-	@echo '    make push            Push an existing image to Docker Hub'
-	@echo '    make deploy          Clean, build and push image to Docker Hub'
-	@echo '    make github          Tag the project in GitHub'
-	@echo
+REF := $(if $(ref),$(ref),"dev")
+SKIP_RELEASE_FILE := $(if $(skip_release_file),$(skip_release_file),true)
+RELEASE_FILE_NAME := $(if $(release_file_name),$(release_file_name),"release")
+RELEASE_DIRECTORY := $(if $(release_directory),$(release_directory),".")
+VERSION := $(if $(version),$(version),"")
+SKIP_CHANGELOG := $(if $(skip_changelog),$(skip_changelog),true)
+CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
 
-build:
-	docker build --build-arg V8_VERSION=${TAG} -t ${IMAGE}:${TAG} .
+build:  ## Build the Docker image
+	docker build \
+		--build-arg DOCKER_BUILD_DATE=$(BUILD_DATE) \
+		--build-arg DOCKER_VERSION=$(DOCKER_VERSION) \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) .
 
-clean:
-	# Remove containers with exited status:
-	docker rm `docker ps -a -f status=exited -q` || true
-	docker rmi ${IMAGE}:latest || true
-	docker rmi ${IMAGE}:${TAG} || true
-	# Delete dangling images
-	docker rmi `docker images -f dangling=true -q` || true
+push: ## Push the Docker image to a container registry
+	docker tag $(IMAGE_NAME):$(IMAGE_TAG) docker.io/HamidMolareza/$(IMAGE_NAME):$(IMAGE_TAG)
+	docker push docker.io/HamidMolareza/$(IMAGE_NAME):$(IMAGE_TAG)
 
-push:
-	docker push docker.io/${IMAGE}:${TAG}
-	docker tag ${IMAGE}:${TAG} docker.io/${IMAGE}:latest
-	docker push docker.io/${IMAGE}:latest
+clean:  ## Remove the Docker image
+	docker rmi $(IMAGE_NAME):$(IMAGE_TAG) || true
 
-deploy: clean build push
+deploy: clean build push  ## Deploy means: clean build push
 
-github:
-	git push
-	git tag -a ${TAG} -m 'Version ${TAG}'
-	git push origin --tags
+update-poetry-dependencies:  ## Update poetry dependencies
+	cat requirements.txt | xargs poetry add
+
+# Targets for running workflow commands
+watch-actions: ## Watch a run until it completes, showing its progress
+	gh run watch; notify-send "run is done!"
+
+changelog-action: ## Run changelog action
+	gh workflow run Changelog --ref $(REF) -f version=$(VERSION)
+
+release-action: ## Run release action
+	gh workflow run Release --ref $(REF) -f skip_release_file=$(SKIP_RELEASE_FILE) -f release_file_name=$(RELEASE_FILE_NAME) -f release_directory=$(RELEASE_DIRECTORY) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
+
+# Targets for running standard-version commands
+version: ## Get current program version
+	node -p -e "require('./package.json').version"
 
 
-.PHONY: help build clean push deploy github
+# Help section
+help:  ## Display help message
+	@echo '$(IMAGE_NAME):$(IMAGE_TAG) Docker image build file'
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Targets:"
+	@awk -F ':|##' '/^[^\t].+?:.*?##/ { printf "  %-20s %s\n", $$1, $$NF }' $(MAKEFILE_LIST) | sort
+
+# Default command
+.DEFAULT_GOAL := help

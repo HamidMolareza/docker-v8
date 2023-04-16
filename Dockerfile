@@ -4,10 +4,9 @@
 
 FROM debian:stable-slim as builder
 
-ARG V8_VERSION=latest
-
-RUN apt-get update && apt-get upgrade -yqq
-
+# Install dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt-get update &&\
+     DEBIAN_FRONTEND=noninteractive apt-get upgrade -yqq
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install bison \
                     cdbs \
@@ -19,18 +18,14 @@ RUN DEBIAN_FRONTEND=noninteractive \
                     vim \
                     pkg-config -yqq
 
+# Install depot_tools
 RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-
 ENV PATH="/depot_tools:${PATH}"
-
 RUN fetch v8
 
 WORKDIR /v8
-
 RUN gn gen out/x64.release --args='v8_monolithic=true v8_use_external_startup_data=false is_component_build=false is_debug=false target_cpu="x64" use_goma=false goma_dir="None" v8_enable_backtrace=true v8_enable_disassembler=true v8_enable_object_print=true v8_enable_verify_heap=true'
-
 RUN ninja -C out/x64.release d8
-
 RUN strip out/x64.release/d8
 
 # ==============================================================================
@@ -39,26 +34,57 @@ RUN strip out/x64.release/d8
 
 FROM debian:stable-slim
 
-ARG V8_VERSION=latest
-ENV V8_VERSION=$V8_VERSION
+ARG DOCKER_MAINTAINER="Hamid Molareza <HamidMolareza@gmail.com>"
+LABEL maintainer="$DOCKER_MAINTAINER"
+ENV DOCKER_MAINTAINER="$DOCKER_MAINTAINER"
 
-LABEL v8.version=$V8_VERSION \
-      maintainer="andre.burgaud@gmail.com"
+ARG DOCKER_VERSION
+LABEL org.label-schema.schema-version="$DOCKER_VERSION"
+ENV DOCKER_VERSION="$DOCKER_VERSION"
 
+ARG DOCKER_BUILD_DATE
+LABEL org.label-schema.build-date="$DOCKER_BUILD_DATE"
+ENV DOCKER_BUILD_DATE="$DOCKER_BUILD_DATE"
+
+ARG VCS_URL="https://github.com/HamidMolareza/v8-docker"
+LABEL org.label-schema.vcs-url="https://github.com/HamidMolareza/v8-docker"
+ENV VCS_URL="$VCS_URL"
+
+ARG BUG_REPORT="$VCS_URL/issues"
+ENV BUG_REPORT="$BUG_REPORT"
+
+ARG DOCKER_NAME="hamidmolareza/d8"
+LABEL org.label-schema.name="$DOCKER_NAME"
+ENV DOCKER_NAME="$DOCKER_NAME"
+
+LABEL org.label-schema.description="Google V8 docker image"
+
+# Install dependencies
 RUN apt-get update && apt-get upgrade -yqq && \
     DEBIAN_FRONTEND=noninteractive apt-get install curl rlwrap vim -yqq && \
-    apt-get clean
+    apt-get clean && apt install python3-pip -y
+
+# Install entrypoint
+COPY . /build-entrypoint
+
+WORKDIR /build-entrypoint
+RUN pip install poetry &&\
+    chmod +x ./install-package.sh &&\
+    ./install-package.sh &&\
+    (cd / && rm -r /build-entrypoint) &&\
+    entrypoint --version
+
+# Final configurations
 
 WORKDIR /v8
-
 COPY --from=builder /v8/out/x64.release/d8 ./
 
 COPY vimrc /root/.vimrc
+COPY samples /samples
 
-COPY entrypoint.sh /
+COPY docker_entrypoint/entrypoint.sh /entrypoint/entrypoint.sh
 
-RUN chmod +x /entrypoint.sh && \
-    mkdir /examples && \
+RUN chmod +x /entrypoint/entrypoint.sh && \
     ln -s /v8/d8 /usr/local/bin/d8
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint/entrypoint.sh"]

@@ -34,17 +34,17 @@ RUN strip out/x64.release/d8
 
 FROM debian:stable-slim
 
-ARG MAINTAINER="Hamid Molareza <HamidMolareza@gmail.com>"
-LABEL maintainer="$MAINTAINER"
-ENV MAINTAINER="$MAINTAINER"
+ARG DOCKER_MAINTAINER="Hamid Molareza <HamidMolareza@gmail.com>"
+LABEL maintainer="$DOCKER_MAINTAINER"
+ENV DOCKER_MAINTAINER="$DOCKER_MAINTAINER"
 
 ARG DOCKER_VERSION
 LABEL org.label-schema.schema-version="$DOCKER_VERSION"
 ENV DOCKER_VERSION="$DOCKER_VERSION"
 
-ARG BUILD_DATE
-LABEL org.label-schema.build-date="$BUILD_DATE"
-ENV BUILD_DATE="$BUILD_DATE"
+ARG DOCKER_BUILD_DATE
+LABEL org.label-schema.build-date="$DOCKER_BUILD_DATE"
+ENV DOCKER_BUILD_DATE="$DOCKER_BUILD_DATE"
 
 ARG VCS_URL="https://github.com/HamidMolareza/v8-docker"
 LABEL org.label-schema.vcs-url="https://github.com/HamidMolareza/v8-docker"
@@ -53,26 +53,37 @@ ENV VCS_URL="$VCS_URL"
 ARG BUG_REPORT="$VCS_URL/issues"
 ENV BUG_REPORT="$BUG_REPORT"
 
-ARG DOCKER_NAME="HamidMolareza/d8"
+ARG DOCKER_NAME="hamidmolareza/d8"
 LABEL org.label-schema.name="$DOCKER_NAME"
 ENV DOCKER_NAME="$DOCKER_NAME"
 
 LABEL org.label-schema.description="Google V8 docker image"
 
+# Install dependencies
 RUN apt-get update && apt-get upgrade -yqq && \
     DEBIAN_FRONTEND=noninteractive apt-get install curl rlwrap vim -yqq && \
-    apt-get clean
+    apt-get clean && apt install python3-pip -y
+
+# Install entrypoint
+COPY . /build-entrypoint
+
+WORKDIR /build-entrypoint
+RUN pip install poetry &&\
+    chmod +x ./install-package.sh &&\
+    ./install-package.sh &&\
+    (cd / && rm -r /build-entrypoint) &&\
+    entrypoint --version
+
+# Final configurations
 
 WORKDIR /v8
-
 COPY --from=builder /v8/out/x64.release/d8 ./
 
 COPY vimrc /root/.vimrc
+COPY samples /samples
 
-COPY docker_entrypoint /entrypoint
-COPY examples /
+COPY docker_entrypoint/entrypoint.sh /entrypoint/entrypoint.sh
 
-# TODO: rewite entrypoint.sh into python
 RUN chmod +x /entrypoint/entrypoint.sh && \
     ln -s /v8/d8 /usr/local/bin/d8
 

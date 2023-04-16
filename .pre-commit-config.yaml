@@ -37,3 +37,14 @@ repos:
     hooks:
       - id: pylint
         args: [ 'docker_entrypoint/' ]
+        exclude: tests/  # Prevent files in tests/ to be passed in to pylint.
+
+  - repo: https://github.com/Payadel/pre-commit-hooks
+    rev: v0.1.2
+    hooks:
+      - id: run-scripts
+        name: check-tox-before-push
+        args: [ "-f=.hooks/check-tox.sh", "dev" ]
+        stages: [ push ]
+        pass_filenames: false
+        verbose: false

@@ -93,12 +93,15 @@ def _get_support_message(environments: DockerEnvironments) -> Result[str]:
 
 
 @def_result()
-def log_debug_class_properties(logger: logging.Logger, class_object: object, message: Optional[str] = None) -> Result:
+def log_class_properties(logger: logging.Logger, log_level: int ,class_object: object, message: Optional[str] = None) -> Result:
     """
-    Logs the properties of a given class object at the debug level.
+    Logs the properties of a given class object at the given level.
 
     :param logger: The logger parameter is an instance of the logging.Logger class
     :type logger: logging.Logger
+
+    :param log_level: Level of log like DEBUG, INFO, etc.
+    :type log_level: int
 
     :param class_object: The `class_object` parameter is an object of a class whose properties are to be logged.
     :type class_object: object
@@ -114,5 +117,5 @@ def log_debug_class_properties(logger: logging.Logger, class_object: object, mes
     result = f"{message}:\n" if message else ""
     for key, value in vars(class_object).items():
         result += f"\t{key}: {value}\n"
-    logger.debug(result)
+    logger.log(log_level, result)
     return Result.ok()

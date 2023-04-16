@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
+import logging
 
 from on_rails import Result, def_result
 
 from docker_entrypoint._libs.cli_parser import create_cli_parser
-from docker_entrypoint._libs.commands import (command_bash, command_d8,
-                                              command_run, command_samples,
-                                              command_shell)
+from docker_entrypoint._libs.commands import (command_about, command_bash,
+                                              command_d8, command_run,
+                                              command_samples, command_shell)
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.Logger import Logger
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import (log_debug_class_properties,
-                                             log_result)
+from docker_entrypoint._libs.utility import log_class_properties, log_result
 
 logger = Logger.get(__name__)
 
@@ -51,7 +51,7 @@ def run(arguments, parser) -> Result:
 
     return DockerEnvironments.get_environments() \
         .on_success_tee(lambda environments:
-                        log_debug_class_properties(logger, environments, "Environments")
+                        log_class_properties(logger, logging.DEBUG, environments, "Environments")
                         .on_success(lambda: logger.debug(f"known params: {known_params}\nArgs: {args}"))
                         ) \
         .on_success(lambda environments: _run(known_params, args, parser, environments))
@@ -102,6 +102,8 @@ def _run(known_params, args, parser, environments: DockerEnvironments) -> Result
         return command_bash(logger, args)
     if known_params.command == 'samples':
         return command_samples(logger, environments)
+    if known_params.command == 'about':
+        return command_about(logger, environments)
 
     # Other
     print(f'Unknown command: {known_params.command}')

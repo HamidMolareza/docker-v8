@@ -40,6 +40,9 @@ def create_cli_parser() -> Result[argparse.ArgumentParser]:
     # Create a sub-parser for the 'samples' command
     samples_parser = argparse.ArgumentParser(add_help=False)
 
+    # Create a sub-parser for the 'about' command
+    about_parser = argparse.ArgumentParser(add_help=False)
+
     # Add sub-parsers for the commands
     subparsers = parser.add_subparsers(dest='command')
 
@@ -51,5 +54,6 @@ def create_cli_parser() -> Result[argparse.ArgumentParser]:
     subparsers.add_parser('d8', parents=[d8_parser], help='Default d8 shell')
     subparsers.add_parser('bash', parents=[bash_parser], help='Execute a bash shell with arguments')
     subparsers.add_parser('samples', parents=[samples_parser], help='Show samples')
+    subparsers.add_parser('about', parents=[about_parser], help='Show About message')
 
     return Result.ok(parser)

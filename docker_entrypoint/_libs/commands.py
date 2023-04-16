@@ -8,6 +8,7 @@ from pylity import Path
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
+from docker_entrypoint._libs.utility import log_class_properties
 
 
 @def_result()
@@ -158,3 +159,19 @@ def command_samples(logger: logging.Logger, environments: DockerEnvironments) ->
 
     logger.info(result)
     return Result.ok()
+
+
+@def_result()
+def command_about(logger: logging.Logger, environments: DockerEnvironments) -> Result:
+    """
+    This function logs information about the Docker like maintainer, version, built date, etc.
+
+    :param logger: A logging.Logger object used for logging messages
+    :type logger: logging.Logger
+
+    :param environments: The function takes this parameter as an argument and returns a log message with
+    information about the program or application being executed
+    :type environments: DockerEnvironments
+    """
+
+    return log_class_properties(logger, logging.INFO, environments, "About")

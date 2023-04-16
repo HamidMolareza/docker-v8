@@ -46,6 +46,8 @@ build-push-docker: ## Build and Push the Docker image
 version: ## Get current program version
 	node -p -e "require('./package.json').version"
 
+coverage-action:  ## Generate coverage report
+	gh workflow run 'Coverage Report' --ref $(REF)
 
 # Help section
 help:  ## Display help message

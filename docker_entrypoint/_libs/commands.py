@@ -145,6 +145,8 @@ def command_samples(logger: logging.Logger, environments: DockerEnvironments) ->
     result += "Samples:\n"
     result += f"\tdocker run --rm -it {environments.docker_name} run " \
               f"/samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs\n"
+    result += f"\tdocker run --rm -it -v $PWD:/solution {environments.docker_name} run " \
+              f"/solution/program.js -d /solution/sample-inputs\t: Execute your javascript program with inputs\n"
     result += f"\tdocker run --rm -it {environments.docker_name} shell\t: " \
               "starts enhanced d8 shell with the given arguments\n"
     result += f"\tdocker run --rm -it {environments.docker_name} d8\t: " \

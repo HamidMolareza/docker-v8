@@ -90,6 +90,7 @@ def _run(known_params, args, parser, environments: DockerEnvironments) -> Result
         return Result.fail(detail=FailResult(code=ExitCode.MISUSE_SHELL_BUILTINS))
 
     # Process the command
+    known_params.command = known_params.command.lower()
     if known_params.command == 'run':
         files_and_dirs = known_params.file or []
         files_and_dirs += known_params.directory or []

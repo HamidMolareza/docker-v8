@@ -36,7 +36,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: d8:latest
+          tags: "d8:${{ env.DOCKER_VERSION }}"
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}

@@ -34,9 +34,8 @@ jobs:
       - name: Build Docker
         uses: docker/build-push-action@v4
         with:
-          context: .
           push: true
-          tags: "d8:${{ env.DOCKER_VERSION }}"
+          tags: hamidmolareza/d8:latest
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}

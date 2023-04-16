@@ -1,9 +1,9 @@
 import logging
 from typing import Optional
 
-from docker_environments import DockerEnvironments
 from on_rails import Result, ValidationError, def_result
 
+from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 D8_Recommended_OPTIONS = {
@@ -25,12 +25,13 @@ D8_Recommended_OPTIONS = {
 def log_result(logger: logging.Logger, result: Result) -> Result:
     if result.success:
         return result
-    if result.detail and result.detail is FailResult:
+    if result.detail and isinstance(result.detail, FailResult):
         return result
 
     log_error(logger, result) \
         .on_fail(lambda prev_result:
                  print(f"Error while logging details:\n{logger.error(repr(prev_result))}"))
+    return result
 
 
 @def_result()
@@ -49,17 +50,17 @@ def log_error(logger: logging.Logger, fail_result: Result) -> Result:
 @def_result()
 def get_support_message() -> Result[str]:
     return DockerEnvironments.get_environments() \
-        .on_success(_get_support_message)
+        .on_success(lambda environments: _get_support_message(environments))
 
 
 @def_result()
 def _get_support_message(environments: DockerEnvironments) -> Result[str]:
     return Result.ok(value="Support:\n"
-                           f"\tMaintainer: {environments.maintainer}"
-                           f"\tDocker Version: {environments.docker_version}"
-                           f"\tBuild Date: {environments.build_date}"
-                           f"\tRepository: {environments.vcs_url}"
-                           f"\tReport Bug: {environments.bug_report}"
+                           f"\tMaintainer: {environments.maintainer}\n"
+                           f"\tDocker Version: {environments.docker_version}\n"
+                           f"\tBuild Date: {environments.build_date}\n"
+                           f"\tRepository: {environments.vcs_url}\n"
+                           f"\tReport Bug: {environments.bug_report}\n"
                      )
 
 

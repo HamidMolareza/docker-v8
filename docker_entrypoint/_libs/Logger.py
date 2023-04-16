@@ -7,7 +7,7 @@ class Logger:
 
     @staticmethod
     def get(name: str):
-        if Logger._logger is not None:
+        if Logger._logger is None:
             Logger._logger = logging.getLogger(name)
             formatter = logging.Formatter('[%(levelname)s] %(message)s')
             console_handler = logging.StreamHandler()
@@ -16,5 +16,5 @@ class Logger:
         return Logger._logger
 
     @staticmethod
-    def set_level(verbose: Optional[bool]):
-        Logger._logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+    def set_level(debug: Optional[bool], name: Optional[str] = None):
+        Logger.get(name).setLevel(logging.DEBUG if debug else logging.INFO)

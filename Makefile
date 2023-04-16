@@ -1,4 +1,4 @@
-.PHONY: help build push clean update-poetry-dependencies watch-actions release-action changelog-action
+.PHONY: help build push clean update-poetry-dependencies watch-actions release-action changelog-action build-push-docker
 
 # Define variables
 IMAGE_NAME = d8
@@ -7,9 +7,6 @@ BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 DOCKER_VERSION = $(shell node -p -e "require('./package.json').version")
 
 REF := $(if $(ref),$(ref),"dev")
-SKIP_RELEASE_FILE := $(if $(skip_release_file),$(skip_release_file),true)
-RELEASE_FILE_NAME := $(if $(release_file_name),$(release_file_name),"release")
-RELEASE_DIRECTORY := $(if $(release_directory),$(release_directory),".")
 VERSION := $(if $(version),$(version),"")
 SKIP_CHANGELOG := $(if $(skip_changelog),$(skip_changelog),true)
 CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
@@ -40,7 +37,10 @@ changelog-action: ## Run changelog action
 	gh workflow run Changelog --ref $(REF) -f version=$(VERSION)
 
 release-action: ## Run release action
-	gh workflow run Release --ref $(REF) -f skip_release_file=$(SKIP_RELEASE_FILE) -f release_file_name=$(RELEASE_FILE_NAME) -f release_directory=$(RELEASE_DIRECTORY) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
+	gh workflow run Release --ref $(REF) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
+
+build-push-docker: ## Build and Push the Docker image
+	gh workflow run 'Push Docker Image' --ref dev
 
 # Targets for running standard-version commands
 version: ## Get current program version

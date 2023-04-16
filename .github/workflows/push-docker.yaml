@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Push Docker Image
 on:
   workflow_dispatch:
 
@@ -37,7 +37,7 @@ jobs:
           push: false
           tags: d8:latest
           build-args: |
-            BUILD_DATE=${{ env.BUILD_DATE }}
+            DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}
             
 #     TODO: Add Test

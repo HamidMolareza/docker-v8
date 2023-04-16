@@ -34,7 +34,7 @@ jobs:
       - name: Build Docker
         uses: docker/build-push-action@v4
         with:
-          push: false
+          push: true
           tags: d8:latest
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}

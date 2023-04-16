@@ -1,7 +1,7 @@
 .PHONY: help build push clean update-poetry-dependencies watch-actions release-action changelog-action
 
 # Define variables
-IMAGE_NAME = V8
+IMAGE_NAME = v8
 IMAGE_TAG = latest
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 DOCKER_VERSION = $(shell node -p -e "require('./package.json').version")
@@ -17,7 +17,7 @@ CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
 build:  ## Build the Docker image
 	docker build \
 		--build-arg BUILD_DATE=$(BUILD_DATE) \
-		DOCKER_VERSION=$(DOCKER_VERSION) \
+		--build-arg DOCKER_VERSION=$(DOCKER_VERSION) \
 		-t $(IMAGE_NAME):$(IMAGE_TAG) .
 
 push: ## Push the Docker image to a container registry

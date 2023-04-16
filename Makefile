@@ -1,7 +1,7 @@
 .PHONY: help build push clean update-poetry-dependencies watch-actions release-action changelog-action
 
 # Define variables
-IMAGE_NAME = v8
+IMAGE_NAME = d8
 IMAGE_TAG = latest
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 DOCKER_VERSION = $(shell node -p -e "require('./package.json').version")

@@ -2,10 +2,9 @@
 [tool.poetry]
 name = "entrypoint"
 version = "0.0.0"
-description = "The v8 docker entrypoint"
+description = "The d8 docker entrypoint"
 authors = ["Hamid Molareza <HamidMolareza@gmail.com>"]
 license = "GPLV3"
-readme = "README.md"
 repository = "https://github.com/HamidMolareza/v8-docker"
 packages = [{ include = "docker_entrypoint" }]
 

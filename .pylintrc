@@ -1,3 +1,12 @@
 [MASTER]
 disable=
     C0114, # missing-module-docstring
+    C0301, # Line too long (line-too-long)
+    R0801, # Similar lines in 2 files
+    E0401, # (import-error)
+    C0103, # Module name doesn't conform to snake_case naming style (invalid-name)
+    W0108, # Lambda may not be necessary (unnecessary-lambda)
+    R0903, # Too few public methods (too-few-public-methods)
+    R0911, # Too many return statements (too-many-return-statements)
+    R0913, # Too many arguments (too-many-arguments)
+    R0912, # Too many branches (14/12) (too-many-branches)

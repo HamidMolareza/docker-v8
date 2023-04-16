@@ -36,4 +36,4 @@ repos:
     rev: v2.14.5
     hooks:
       - id: pylint
-        args: [ "--rcfile=pylint.cfg", "--ignore=venv" ,"docker_entrypoint" ]
+        args: [ 'docker_entrypoint/' ]

@@ -7,6 +7,12 @@ from docker_entrypoint._libs.utility import D8_Recommended_OPTIONS
 
 @def_result()
 def create_cli_parser() -> Result[argparse.ArgumentParser]:
+    """
+    This function creates a command-line interface parser with sub-parsers for different commands and their arguments.
+
+    :return: Returning a `Result` object that contains an `argparse.ArgumentParser` object.
+    """
+
     # Define the main parser
     parser = argparse.ArgumentParser(description='The d8 docker entrypoint')
     parser.add_argument('--version', action='store_true', help='show program version')

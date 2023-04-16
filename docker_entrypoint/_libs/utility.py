@@ -23,6 +23,17 @@ D8_Recommended_OPTIONS = {
 
 @def_result()
 def log_result(logger: logging.Logger, result: Result) -> Result:
+    """
+    Logs unexpected errors. Results that isn't success and isn't type of FailResult
+
+    :param logger: The logger parameter is an instance of the logging.Logger class, which is used for
+    logging messages in the application.
+    :type logger: logging.Logger
+
+    :param result: The `result` parameter is an instance of the `Result` class
+    :type result: Result
+    """
+
     if result.success:
         return result
     if result.detail and isinstance(result.detail, FailResult):
@@ -36,6 +47,17 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
 
 @def_result()
 def log_error(logger: logging.Logger, fail_result: Result) -> Result:
+    """
+    This function logs an error message and returns a support message if a failure result is encountered.
+
+    :param logger: The logger parameter is an instance of the logging.Logger class.
+    :type logger: logging.Logger
+
+    :param fail_result: `fail_result` is an instance of the `Result` class that represents a failed operation.
+    It contains information about the failure, such as an error message or exception
+    :type fail_result: Result
+    """
+
     if fail_result.success:
         return Result.fail(detail=ValidationError(message="Expected failure result but got success result!",
                                                   more_data=[fail_result]))
@@ -49,6 +71,12 @@ def log_error(logger: logging.Logger, fail_result: Result) -> Result:
 
 @def_result()
 def get_support_message() -> Result[str]:
+    """
+    This function returns a support message based on the available Docker environments.
+
+    :return: A Result object containing a string message.
+    """
+
     return DockerEnvironments.get_environments() \
         .on_success(lambda environments: _get_support_message(environments))
 
@@ -66,6 +94,23 @@ def _get_support_message(environments: DockerEnvironments) -> Result[str]:
 
 @def_result()
 def log_debug_class_properties(logger: logging.Logger, class_object: object, message: Optional[str] = None) -> Result:
+    """
+    Logs the properties of a given class object at the debug level.
+
+    :param logger: The logger parameter is an instance of the logging.Logger class
+    :type logger: logging.Logger
+
+    :param class_object: The `class_object` parameter is an object of a class whose properties are to be logged.
+    :type class_object: object
+
+    :param message: The `message` parameter is an optional string that can be passed to the function as a
+    message to be included in the log output.
+    :type message: Optional[str]
+
+    :return: an instance of the `Result` class, which is created by calling the `ok()` method. This indicates that the
+    function has completed successfully without any errors.
+    """
+
     result = f"{message}:\n" if message else ""
     for key, value in vars(class_object).items():
         result += f"\t{key}: {value}\n"

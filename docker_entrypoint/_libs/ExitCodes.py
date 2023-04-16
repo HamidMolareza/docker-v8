@@ -1,4 +1,8 @@
 class ExitCode:
+    """
+    Defines exit codes for various scenarios that a program may encounter during execution.
+    """
+
     # Indicates that the program completed successfully without any errors.
     SUCCESS = 0
 

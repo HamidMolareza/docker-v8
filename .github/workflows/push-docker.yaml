@@ -39,5 +39,3 @@ jobs:
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}
-            
-#     TODO: Add Test

@@ -93,7 +93,8 @@ def _get_support_message(environments: DockerEnvironments) -> Result[str]:
 
 
 @def_result()
-def log_class_properties(logger: logging.Logger, log_level: int ,class_object: object, message: Optional[str] = None) -> Result:
+def log_class_properties(logger: logging.Logger, log_level: int, class_object: object,
+                         message: Optional[str] = None) -> Result:
     """
     Logs the properties of a given class object at the given level.
 

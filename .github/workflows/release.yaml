@@ -52,6 +52,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update poetry version
+        run: |
+          pip install poetry
+          poetry version ${{ steps.release.outputs.version }}
+          git add pyproject.toml
+          git commit -m "chore: update pyproject to ${{ steps.release.outputs.version }}"
+          git push
+
       - name: GitHub Release
         uses: ncipollo/release-action@v1
         with:

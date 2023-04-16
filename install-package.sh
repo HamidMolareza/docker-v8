@@ -1,11 +1,7 @@
 #!/bin/bash
 
 # Inputs
-dist_dir="dist"
-poetry_dir="."
-
-# Build
-(cd "$poetry_dir" && poetry build)
+dist_dir="$1"
 
 # Install
 # Use find command to search for files with the .tar.gz extension and save result in variable

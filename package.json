@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "actions:watch": "gh run watch && notify-send \"run is done!\"",
     "actions:release": "gh workflow run Release --ref dev -f version=''",
     "actions:changelog": "gh workflow run Changelog --ref dev -f version=''",
-    "actions:build": "gh workflow run 'Build Docker Image' --ref dev",
+    "actions:push": "gh workflow run 'Push Docker Image' --ref dev",
     "version": "node -p -e \"require('./package.json').version\""
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ FROM debian:stable-slim as builder
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update &&\
-     DEBIAN_FRONTEND=noninteractive apt-get upgrade -yqq
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -yqq
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get install bison \
                     cdbs \
@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
                     git \
                     python3 \
                     vim \
+                    python3-pip \
                     pkg-config -yqq
 
 # Install depot_tools
@@ -27,6 +28,14 @@ WORKDIR /v8
 RUN gn gen out/x64.release --args='v8_monolithic=true v8_use_external_startup_data=false is_component_build=false is_debug=false target_cpu="x64" use_goma=false goma_dir="None" v8_enable_backtrace=true v8_enable_disassembler=true v8_enable_object_print=true v8_enable_verify_heap=true'
 RUN ninja -C out/x64.release d8
 RUN strip out/x64.release/d8
+
+# Build entrypoint package
+COPY . /build-entrypoint
+WORKDIR /build-entrypoint
+RUN pip install poetry &&\
+    poetry build &&\
+    cp -r dist /tmp/build-entrypoint &&\
+    cp install-package.sh /tmp/build-entrypoint/
 
 # ==============================================================================
 # Second stage build
@@ -65,14 +74,11 @@ RUN apt-get update && apt-get upgrade -yqq && \
     apt-get clean && apt install python3-pip -y
 
 # Install entrypoint
-COPY . /build-entrypoint
-
-WORKDIR /build-entrypoint
-RUN pip install poetry &&\
-    chmod +x ./install-package.sh &&\
-    ./install-package.sh &&\
-    (cd / && rm -r /build-entrypoint) &&\
-    entrypoint --version
+COPY --from=builder /tmp/build-entrypoint /tmp/build-entrypoint
+WORKDIR /tmp/build-entrypoint
+RUN chmod +x install-package.sh &&\
+    ./install-package.sh . &&\
+    cd / && rm -r /tmp/build-entrypoint
 
 # Final configurations
 

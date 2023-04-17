@@ -85,9 +85,8 @@ def _run(known_params, args, parser, environments: DockerEnvironments) -> Result
             return Result.ok()
 
         # Print the list of available commands
-        logger.debug("No command specified.")
         parser.print_help()
-        return Result.fail(detail=FailResult(code=ExitCode.MISUSE_SHELL_BUILTINS))
+        return Result.fail(detail=FailResult(code=ExitCode.MISUSE_SHELL_BUILTINS, message="No command specified."))
 
     # Process the command
     known_params.command = known_params.command.lower()

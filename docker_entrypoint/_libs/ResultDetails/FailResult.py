@@ -8,4 +8,5 @@ class FailResult(ResultDetail):
     """
 
     def __init__(self, code: int, message: str):
-        super().__init__(title=f"Operation failed with code {code}.", code=code, message=message)
+        super().__init__(title=f"Operation failed with code {code}.",
+                         code=code, message=message)

@@ -6,7 +6,8 @@ import unittest
 from on_rails import (ValidationError, assert_error_detail,
                       assert_result_with_type)
 
-from docker_entrypoint._libs.commands import command_run, command_d8
+from docker_entrypoint._libs.commands import (command_d8, command_run,
+                                              command_shell)
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from tests._helpers import assert_fail_result_detail, get_logger
@@ -141,6 +142,33 @@ class TestCommands(unittest.TestCase):
                        f"[DEBUG] Return code: {result.code()}\n"
         self.assertEqual(expected_log, logging_stream.getvalue())
 
+    # endregion
+
+    # region command_shell
+
+    def test_command_shell_not_give_logger(self):
+        result = command_shell(None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The logger is required.", expected_code=400)
+
+    def test_command_shell_give_invalid_list(self):
+        result = command_shell(logging.getLogger(), "not list")
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The 'args' parameter is not valid.",
+                            expected_message="Expected get list of strings but got str.",
+                            expected_code=400)
+
+    def test_command_shell_with_args(self):
+        logger, logging_stream = get_logger()
+        result = command_shell(logger, ['arg1', 'arg2'])
+
+        expected_log = "[DEBUG] Command: bash -c 'sleep 0.5; rlwrap -m -pgreen d8 --harmony --allow-natives-syntax arg1 arg2'\n" \
+                       "[INFO] Default options: ['--harmony', '--allow-natives-syntax']\n" \
+                       "[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n" \
+                       f"[DEBUG] Return code: {result.code()}\n"
+        self.assertEqual(expected_log, logging_stream.getvalue())
 
     # endregion
 

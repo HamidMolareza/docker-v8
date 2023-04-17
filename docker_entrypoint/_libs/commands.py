@@ -141,9 +141,13 @@ def command_shell(logger: logging.Logger, args: Optional[List[str]] = None) -> R
 
     command_str = f"bash -c '{' '.join(bash_command)}'"
     logger.debug(f"Command: {command_str}")
+
     logger.info(f"Default options: {default_options}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")
+
     code = os.system(command_str)
+
+    logger.debug(f"Return code: {code}")
     return convert_code_to_result(code)
 
 

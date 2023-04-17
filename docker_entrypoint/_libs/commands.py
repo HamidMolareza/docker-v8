@@ -88,7 +88,7 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
 
 
 @def_result()
-def command_d8(logger: logging.Logger, args: Optional[List[str]]) -> Result:
+def command_d8(logger: logging.Logger, args: Optional[List[str]] = None) -> Result:
     """
     Runs the D8 Shell with optional arguments and logs the command and a message for exiting the shell.
 
@@ -110,12 +110,12 @@ def command_d8(logger: logging.Logger, args: Optional[List[str]]) -> Result:
 
     logger.debug(f"Command: d8 {' '.join(args)}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")
-    os.system(f"d8 {' '.join(args)}")
-    return Result.ok()
+    code = os.system(f"d8 {' '.join(args)}")
+    return convert_code_to_result(code)
 
 
 @def_result()
-def command_shell(logger: logging.Logger, args: Optional[List[str]]) -> Result:
+def command_shell(logger: logging.Logger, args: Optional[List[str]] = None) -> Result:
     """
     This function runs a shell with default options and optional arguments, using the D8 Shell.
 
@@ -140,12 +140,12 @@ def command_shell(logger: logging.Logger, args: Optional[List[str]]) -> Result:
     logger.debug(f"Command: {command_str}")
     logger.info(f"Default options: {default_options}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")
-    os.system(command_str)
-    return Result.ok()
+    code = os.system(command_str)
+    return convert_code_to_result(code)
 
 
 @def_result()
-def command_bash(logger: logging.Logger, args: Optional[List[str]]) -> Result:
+def command_bash(logger: logging.Logger, args: Optional[List[str]] = None) -> Result:
     """
     Runs a bash command with optional arguments and logs the command and its execution.
 
@@ -166,8 +166,8 @@ def command_bash(logger: logging.Logger, args: Optional[List[str]]) -> Result:
     command_str = f"bash {' '.join(args)}"
     logger.debug(f"Command: {command_str}")
     logger.info("Running bash command. Use --help to see other commands.")
-    os.system(command_str)
-    return Result.ok()
+    code = os.system(command_str)
+    return convert_code_to_result(code)
 
 
 @def_result()

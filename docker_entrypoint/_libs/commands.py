@@ -173,7 +173,10 @@ def command_bash(logger: logging.Logger, args: Optional[List[str]] = None) -> Re
     command_str = f"bash {' '.join(args)}"
     logger.debug(f"Command: {command_str}")
     logger.info("Running bash command. Use --help to see other commands.")
+
     code = os.system(command_str)
+
+    logger.debug(f"Return code: {code}")
     return convert_code_to_result(code)
 
 

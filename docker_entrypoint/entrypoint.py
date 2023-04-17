@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from typing import List, Optional
 
 from on_rails import Result, def_result
 
@@ -15,14 +16,14 @@ from docker_entrypoint._libs.utility import class_properties_to_str, log_result
 logger = Logger.get(__name__)
 
 
-def main():
+def main(args: Optional[List[str]] = None) -> int:
     """
     This is a main function that creates a command-line interface parser, parses the arguments, runs the program, and logs
     the result.
     """
 
     result = create_cli_parser() \
-        .on_success(lambda parser: (parser.parse_known_args(), parser)) \
+        .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
         .on_fail_break_function() \
         .on_success(lambda values: run(values[0], values[1])) \
         .finally_tee(lambda prev_result: log_result(logger, prev_result)
@@ -31,8 +32,8 @@ def main():
                                                        f"Previous Result: {prev_result}"))
                      )
     if result.success:
-        raise SystemExit(0)
-    raise SystemExit(result.code())
+        return 0
+    return result.code()
 
 
 @def_result()
@@ -120,4 +121,5 @@ def _run(known_params, args, parser, environments: DockerEnvironments) -> Result
 # If the script is being imported as a module, then the `main()` function is not called, and the module can be
 # used as a library by other programs.
 if __name__ == '__main__':
-    main()
+    code = main()
+    raise SystemExit(code)

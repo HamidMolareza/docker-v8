@@ -193,7 +193,6 @@ class TestUtility(unittest.TestCase):
         result = convert_code_to_result(0)
         assert_result(self, result, expected_success=True)
 
-
     # endregion
 
 

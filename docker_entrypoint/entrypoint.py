@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import logging
 
 from on_rails import Result, def_result
 
@@ -11,7 +10,7 @@ from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.Logger import Logger
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import log_class_properties, log_result
+from docker_entrypoint._libs.utility import class_properties_to_str, log_result
 
 logger = Logger.get(__name__)
 
@@ -55,7 +54,7 @@ def run(arguments, parser) -> Result:
 
     return DockerEnvironments.get_environments() \
         .on_success_tee(lambda environments:
-                        log_class_properties(logger, logging.DEBUG, environments, "Environments")
+                        logger.debug(class_properties_to_str(environments, "Environments"))
                         .on_success(lambda: logger.debug(f"known params: {known_params}\nArgs: {args}"))
                         ) \
         .on_success(lambda environments: _run(known_params, args, parser, environments))

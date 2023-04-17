@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from on_rails import Result, ValidationError, def_result
+from pylity import String
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
@@ -103,33 +104,34 @@ def _get_support_message(environments: DockerEnvironments) -> Result[str]:
 
 
 @def_result()
-def log_class_properties(logger: logging.Logger, log_level: int, class_object: object,
-                         message: Optional[str] = None) -> Result:
+def class_properties_to_str(class_object: object, title: Optional[str] = None) -> Result[str]:
     """
-    Logs the properties of a given class object at the given level.
+    The function converts the properties of a class object to a string format with an optional title.
 
-    :param logger: The logger parameter is an instance of the logging.Logger class
-    :type logger: logging.Logger
-
-    :param log_level: Level of log like DEBUG, INFO, etc.
-    :type log_level: int
-
-    :param class_object: The `class_object` parameter is an object of a class whose properties are to be logged.
+    :param class_object: The object of the class whose properties need to be converted to a string
     :type class_object: object
 
-    :param message: The `message` parameter is an optional string that can be passed to the function as a
-    message to be included in the log output.
-    :type message: Optional[str]
+    :param title: The title parameter is an optional string that can be passed to provide additional context or
+    information in the resulting string. If no title is provided, the resulting string will only contain the class
+    properties
+    :type title: Optional[str]
 
-    :return: an instance of the `Result` class, which is created by calling the `ok()` method. This indicates that the
-    function has completed successfully without any errors.
+    :return: a Result object that contains a string value. The string value contains the properties of the input class
+    object formatted as key-value pairs. If a title is provided, it is included at the beginning of the string. If there
+    is an error, a Result object with a ValidationError message is returned.
     """
 
-    result = f"{message}:\n" if message else ""
+    if not class_object:
+        return Result.fail(ValidationError(message="The class object is required."))
+    if title and not isinstance(title, str):
+        return Result.fail(ValidationError(message="The message must be a string."))
+
+    has_message = not String.is_none_or_empty(title)
+    result = f"{title}:\n" if has_message else ""
+    tab = '\t' if has_message else ''
     for key, value in vars(class_object).items():
-        result += f"\t{key}: {value}\n"
-    logger.log(log_level, result)
-    return Result.ok()
+        result += f"{tab}{key}: {value}\n"
+    return Result.ok(value=result)
 
 
 @def_result()

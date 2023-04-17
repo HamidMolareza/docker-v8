@@ -5,7 +5,8 @@ from on_rails import (Result, ValidationError, assert_error_detail,
                       assert_result, assert_result_with_type)
 
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import (get_support_message, log_error,
+from docker_entrypoint._libs.utility import (class_properties_to_str,
+                                             get_support_message, log_error,
                                              log_result)
 from tests._helpers import get_logger
 
@@ -124,11 +125,54 @@ class TestUtility(unittest.TestCase):
         result = get_support_message()
         assert_result(self, target_result=result, expected_success=True,
                       expected_value="Support:\n"
-                      "\tMaintainer: No Data!\n"
-                      "\tDocker Version: latest\n"
-                      "\tBuild Date: No Data!\n"
-                      "\tRepository: No Data!\n"
-                      "\tReport Bug: No Data!\n")
+                                     "\tMaintainer: No Data!\n"
+                                     "\tDocker Version: latest\n"
+                                     "\tBuild Date: No Data!\n"
+                                     "\tRepository: No Data!\n"
+                                     "\tReport Bug: No Data!\n")
+
+    # endregion
+
+    # region class_properties_to_str
+
+    def test_class_properties_to_str_give_none(self):
+        result = class_properties_to_str(None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The class object is required.",
+                            expected_code=400)
+
+    def test_class_properties_to_str_give_invalid_message(self):
+        result = class_properties_to_str(self, ['not string'])
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The message must be a string.",
+                            expected_code=400)
+
+    def test_class_properties_to_str_without_msg(self):
+        class Fake:
+            def __init__(self):
+                self.prop1 = "prop1"
+                self.prop2 = "prop2"
+
+        result = class_properties_to_str(Fake())
+        assert_result(self, result, expected_success=True, expected_value="prop1: prop1\nprop2: prop2\n")
+
+        result = class_properties_to_str(Fake(), title="   ")
+        assert_result(self, result, expected_success=True, expected_value="prop1: prop1\nprop2: prop2\n")
+
+    def test_class_properties_to_str_with_msg(self):
+        class Fake:
+            def __init__(self):
+                self.prop1 = "prop1"
+                self.prop2 = "prop2"
+
+        result = class_properties_to_str(Fake(), title="message")
+        assert_result(self, result, expected_success=True, expected_value="message:\n"
+                                                                          "\tprop1: prop1\n"
+                                                                          "\tprop2: prop2\n")
 
     # endregion
 

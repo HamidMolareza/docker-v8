@@ -9,8 +9,8 @@ from pylity.Collection import Collection
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import (convert_code_to_result,
-                                             log_class_properties)
+from docker_entrypoint._libs.utility import (class_properties_to_str,
+                                             convert_code_to_result)
 
 
 @def_result()
@@ -241,4 +241,5 @@ def command_about(logger: logging.Logger, environments: DockerEnvironments) -> R
                                            message="The 'environments' parameter is required and must be "
                                                    "an instance of `DockerEnvironments`."))
 
-    return log_class_properties(logger, logging.INFO, environments, "About")
+    logger.info(class_properties_to_str(environments, title="About"))
+    return Result.ok()

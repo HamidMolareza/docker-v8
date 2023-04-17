@@ -3,11 +3,13 @@ import os
 import tempfile
 import unittest
 
-from on_rails import (ValidationError, assert_error_detail,
+from on_rails import (ValidationError, assert_error_detail, assert_result,
                       assert_result_with_type)
 
-from docker_entrypoint._libs.commands import (command_bash, command_d8,
-                                              command_run, command_shell)
+from docker_entrypoint._libs.commands import (command_about, command_bash,
+                                              command_d8, command_run,
+                                              command_samples, command_shell)
+from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from tests._helpers import assert_fail_result_detail, get_logger
@@ -195,6 +197,78 @@ class TestCommands(unittest.TestCase):
         expected_log = "[DEBUG] Command: bash arg1 arg2\n" \
                        "[INFO] Running bash command. Use --help to see other commands.\n" \
                        f"[DEBUG] Return code: {result.code()}\n"
+        self.assertEqual(expected_log, logging_stream.getvalue())
+
+    # endregion
+
+    # region command_samples
+
+    def test_command_samples_not_give_logger(self):
+        result = command_samples(None, DockerEnvironments.get_environments().value)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The logger is required.", expected_code=400)
+
+    def test_command_samples_not_give_environments(self):
+        result = command_samples(logging.getLogger(), None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The 'environments' parameter is not valid",
+                            expected_message="The 'environments' parameter is required and must be "
+                                             "an instance of `DockerEnvironments`.", expected_code=400)
+
+    def test_command_samples_ok(self):
+        logger, logging_stream = get_logger()
+        result = command_samples(logger, DockerEnvironments.get_environments().value)
+
+        assert_result(self, result, expected_success=True)
+
+        expected_log = "[INFO] Use -h or --help for more information about commands.\n" \
+                       "Samples:\n" \
+                       "\tdocker run --rm -it No Data! run /samples/say-hello.js -f /samples/sample-inputs/0.txt -d " \
+                       "/samples/sample-inputs :\tExecute sample javascript with sample inputs\n" \
+                       "\tdocker run --rm -it -v $PWD:/solution No Data! run /solution/program.js -d " \
+                       "/solution/sample-inputs :\tExecute your local javascript program with your local inputs\n" \
+                       "\tdocker run --rm -it No Data! shell :\tstarts enhanced d8 shell with the given arguments\n" \
+                       "\tdocker run --rm -it No Data! d8 :\tstarts default d8 shell with the given arguments\n" \
+                       "\tdocker run --rm -it No Data! bash :\tstarts a bash shell with the given arguments\n" \
+                       "\tdocker run --rm -it No Data! :\tstarts a bash shell with the given arguments\n" \
+                       "\tdocker run --rm -it No Data! --version :\tdisplays the program version\n\n"
+        self.assertEqual(expected_log, logging_stream.getvalue())
+
+    # endregion
+
+    # region command_about
+
+    def test_command_about_not_give_logger(self):
+        result = command_about(None, DockerEnvironments.get_environments().value)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The logger is required.", expected_code=400)
+
+    def test_command_about_not_give_environments(self):
+        result = command_about(logging.getLogger(), None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The 'environments' parameter is not valid",
+                            expected_message="The 'environments' parameter is required and must be "
+                                             "an instance of `DockerEnvironments`.", expected_code=400)
+
+    def test_command_about_ok(self):
+        logger, logging_stream = get_logger()
+        result = command_about(logger, DockerEnvironments.get_environments().value)
+
+        assert_result(self, result, expected_success=True)
+
+        expected_log = "[INFO] About:\n" \
+                       "\tmaintainer: No Data!\n" \
+                       "\tdocker_version: latest\n" \
+                       "\tbuild_date: No Data!\n" \
+                       "\tvcs_url: No Data!\n" \
+                       "\tbug_report: No Data!\n" \
+                       "\tdocker_name: No Data!\n\n"
         self.assertEqual(expected_log, logging_stream.getvalue())
 
     # endregion

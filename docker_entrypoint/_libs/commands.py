@@ -60,7 +60,7 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
     if not result.success:
         if result.detail.is_instance_of(ValidationError):
             return Result.fail(FailResult(code=ExitCode.IO_ERROR, message=str(result.detail)))
-        return result
+        return result  # pragma: no cover
     files: List[str] = result.value
 
     if len(files) == 0:
@@ -79,10 +79,10 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
         command = f"bash -c 'd8 {program} {' '.join(args)} < {file}'"
         logger.debug(f"command: {command}")
         code = os.system(command)
-        if code != 0:
-            logger.debug(f"Return Code: {code}")
-            final_code = code
+        logger.debug(f"Return Code: {code}")
         print('----------------------------------------------------------------')
+        if code != 0:
+            final_code = code
 
     return convert_code_to_result(final_code)
 

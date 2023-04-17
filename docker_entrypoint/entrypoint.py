@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from typing import List, Optional
 
 from on_rails import Result, def_result
@@ -110,7 +109,7 @@ def _run(known_params, args, parser, environments: DockerEnvironments) -> Result
         return command_about(logger, environments)
 
     # Other
-    print(f'Unknown command: {known_params.command}')
+    logger.error(f"Unknown command: {known_params.command}")
     parser.print_help()
     return Result.ok()
 

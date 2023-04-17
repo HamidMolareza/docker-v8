@@ -40,7 +40,7 @@ repos:
         exclude: tests/  # Prevent files in tests/ to be passed in to pylint.
 
   - repo: https://github.com/Payadel/pre-commit-hooks
-    rev: v0.1.2
+    rev: v0.1.3
     hooks:
       - id: run-scripts
         name: check-tox-before-push

@@ -110,7 +110,10 @@ def command_d8(logger: logging.Logger, args: Optional[List[str]] = None) -> Resu
 
     logger.debug(f"Command: d8 {' '.join(args)}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")
+
     code = os.system(f"d8 {' '.join(args)}")
+
+    logger.debug(f"Return code: {code}")
     return convert_code_to_result(code)
 
 

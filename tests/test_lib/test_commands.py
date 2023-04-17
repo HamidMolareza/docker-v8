@@ -6,7 +6,7 @@ import unittest
 from on_rails import (ValidationError, assert_error_detail,
                       assert_result_with_type)
 
-from docker_entrypoint._libs.commands import command_run
+from docker_entrypoint._libs.commands import command_run, command_d8
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from tests._helpers import assert_fail_result_detail, get_logger
@@ -97,6 +97,50 @@ class TestCommands(unittest.TestCase):
                            f"[DEBUG] command: bash -c 'd8 {file1}  < {file2}'\n" \
                            f"[DEBUG] Return Code: {result.code()}\n"
             self.assertEqual(expected_log, logging_stream.getvalue())
+
+    def test_command_run_give_files_and_args(self):
+        with tempfile.TemporaryDirectory() as tmp_dir_name:
+            file = os.path.join(tmp_dir_name, "program.js")
+            with open(file, "w") as f:
+                f.write("")
+
+            logger, logging_stream = get_logger()
+
+            result = command_run(logger, file, [file], ['arg1', 'arg2'])
+
+            expected_log = "[DEBUG] Number of input files: 1\n" \
+                           f"[INFO] file 1: {file}\n" \
+                           f"[DEBUG] command: bash -c 'd8 {file} arg1 arg2 < {file}'\n" \
+                           f"[DEBUG] Return Code: {result.code()}\n"
+            self.assertEqual(expected_log, logging_stream.getvalue())
+
+    # endregion
+
+    # region command_d8
+
+    def test_command_d8_not_give_logger(self):
+        result = command_d8(None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The logger is required.", expected_code=400)
+
+    def test_command_d8_give_invalid_list(self):
+        result = command_d8(logging.getLogger(), "not list")
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The 'args' parameter is not valid.",
+                            expected_message="Expected get list of strings but got str.",
+                            expected_code=400)
+
+    def test_command_d8_with_args(self):
+        logger, logging_stream = get_logger()
+        result = command_d8(logger, ['arg1', 'arg2'])
+
+        expected_log = "[DEBUG] Command: d8 arg1 arg2\n" \
+                       f"[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n" \
+                       f"[DEBUG] Return code: {result.code()}\n"
+        self.assertEqual(expected_log, logging_stream.getvalue())
+
 
     # endregion
 

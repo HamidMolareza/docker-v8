@@ -4,16 +4,18 @@ from typing import List, Optional
 
 from on_rails import Result, ValidationError, def_result
 from pylity import Path
+from pylity.Collection import Collection
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import log_class_properties
+from docker_entrypoint._libs.utility import (convert_code_to_result,
+                                             log_class_properties)
 
 
 @def_result()
-def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[List[str]],
-                args: Optional[List[str]]) -> Result:
+def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[List[str]] = None,
+                args: Optional[List[str]] = None) -> Result:
     """
     Runs a javascript source with optional arguments and files/directories as input, and logs the output.
 
@@ -37,31 +39,52 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
     of `result` in the function.
     """
 
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+
     if not os.path.isfile(program):
-        logger.error(f"File {program} does not exists.")
-        return Result.fail(FailResult(code=ExitCode.IO_ERROR))
+        return Result.fail(FailResult(code=ExitCode.IO_ERROR, message=f"File '{program}' does not exists."))
 
     files_and_dirs = files_and_dirs or []
     args = args or []
 
+    if not Collection.is_list(files_and_dirs, str):
+        return Result.fail(ValidationError(title="The 'files_and_dirs' parameter is not valid.",
+                                           message=f"Expected get list of strings but "
+                                                   f"got {type(files_and_dirs).__name__}."))
+    if not Collection.is_list(args, str):
+        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
+                                           message=f"Expected get list of strings but got {type(args).__name__}."))
+
     result = Path.collect_files(files_and_dirs)
     if not result.success:
         if result.detail.is_instance_of(ValidationError):
-            logger.error(result)
-            return Result.fail(FailResult(code=ExitCode.IO_ERROR))
+            return Result.fail(FailResult(code=ExitCode.IO_ERROR, message=str(result.detail)))
         return result
     files: List[str] = result.value
 
     if len(files) == 0:
         logger.warning("No file provided.")
-        os.system(f"bash -c 'd8 {program}'")
-        return Result.ok()
+        command = f"bash -c 'd8 {program}'"
+        logger.debug(f"command: {command}")
+        code = os.system(command)
+        logger.debug(f"Return Code: {code}")
+        return convert_code_to_result(code)
 
+    final_code = 0
+    logger.debug(f"Number of input files: {len(files)}")
+    files.sort()
     for index, file in enumerate(files):
         logger.info(f"file {index + 1}: {file}")
-        os.system(f"bash -c 'd8 {program} {' '.join(args)} < {file}'")
+        command = f"bash -c 'd8 {program} {' '.join(args)} < {file}'"
+        logger.debug(f"command: {command}")
+        code = os.system(command)
+        if code != 0:
+            logger.debug(f"Return Code: {code}")
+            final_code = code
         print('----------------------------------------------------------------')
-    return Result.ok()
+
+    return convert_code_to_result(final_code)
 
 
 @def_result()

@@ -4,6 +4,7 @@ from typing import Optional
 from on_rails import Result, ValidationError, def_result
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
+from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 D8_Recommended_OPTIONS = {
     '--harmony': 'Enables support for some of the experimental ES6 features that are not yet fully standardized',
@@ -113,3 +114,18 @@ def log_class_properties(logger: logging.Logger, log_level: int, class_object: o
         result += f"\t{key}: {value}\n"
     logger.log(log_level, result)
     return Result.ok()
+
+
+@def_result()
+def convert_code_to_result(code: int) -> Result:
+    """
+    The function converts a code to a Result object, returning an OK result if the code is 0 and a FailResult object
+    otherwise.
+
+    :param code: an integer representing the result code of an operation
+    :type code: int
+    """
+
+    if code == 0:
+        return Result.ok()
+    return Result.fail(FailResult(code=code))

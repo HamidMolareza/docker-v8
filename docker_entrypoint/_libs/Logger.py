@@ -29,6 +29,7 @@ class Logger:
             console_handler = logging.StreamHandler()
             console_handler.setFormatter(formatter)
             Logger._logger.addHandler(console_handler)
+            Logger._logger.setLevel(logging.INFO)
         return Logger._logger
 
     @staticmethod

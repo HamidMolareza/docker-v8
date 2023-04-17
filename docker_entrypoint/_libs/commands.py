@@ -203,17 +203,19 @@ def command_samples(logger: logging.Logger, environments: DockerEnvironments) ->
     result = "Use -h or --help for more information about commands.\n"
     result += "Samples:\n"
     result += f"\tdocker run --rm -it {environments.docker_name} run " \
-              f"/samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs\n"
+              f"/samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs :\t" \
+              f"Execute sample javascript with sample inputs\n"
     result += f"\tdocker run --rm -it -v $PWD:/solution {environments.docker_name} run " \
-              f"/solution/program.js -d /solution/sample-inputs\t: Execute your javascript program with inputs\n"
-    result += f"\tdocker run --rm -it {environments.docker_name} shell\t: " \
+              f"/solution/program.js -d /solution/sample-inputs :\t" \
+              f"Execute your local javascript program with your local inputs\n"
+    result += f"\tdocker run --rm -it {environments.docker_name} shell :\t" \
               "starts enhanced d8 shell with the given arguments\n"
-    result += f"\tdocker run --rm -it {environments.docker_name} d8\t: " \
+    result += f"\tdocker run --rm -it {environments.docker_name} d8 :\t" \
               f"starts default d8 shell with the given arguments\n"
-    result += f"\tdocker run --rm -it {environments.docker_name} bash\t: " \
+    result += f"\tdocker run --rm -it {environments.docker_name} bash :\t" \
               "starts a bash shell with the given arguments\n"
-    result += f"\tdocker run --rm -it {environments.docker_name}\t: starts a bash shell with the given arguments\n"
-    result += f"\tdocker run --rm -it {environments.docker_name} --version\t: displays the program version\n"
+    result += f"\tdocker run --rm -it {environments.docker_name} :\tstarts a bash shell with the given arguments\n"
+    result += f"\tdocker run --rm -it {environments.docker_name} --version :\tdisplays the program version\n"
 
     logger.info(result)
     return Result.ok()

@@ -5,7 +5,8 @@ from on_rails import (Result, ValidationError, assert_error_detail,
                       assert_result, assert_result_with_type)
 
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import log_error, log_result
+from docker_entrypoint._libs.utility import (get_support_message, log_error,
+                                             log_result)
 from tests._helpers import get_logger
 
 
@@ -114,6 +115,20 @@ class TestUtility(unittest.TestCase):
                       "\tReport Bug: No Data!",
                       logging_stream.getvalue())
         print(logging_stream.getvalue())
+
+    # endregion
+
+    # region get_support_message
+
+    def test_get_support_message(self):
+        result = get_support_message()
+        assert_result(self, target_result=result, expected_success=True,
+                      expected_value="Support:\n"
+                      "\tMaintainer: No Data!\n"
+                      "\tDocker Version: latest\n"
+                      "\tBuild Date: No Data!\n"
+                      "\tRepository: No Data!\n"
+                      "\tReport Bug: No Data!\n")
 
     # endregion
 

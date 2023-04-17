@@ -102,6 +102,12 @@ def command_d8(logger: logging.Logger, args: Optional[List[str]]) -> Result:
     :return: a `Result` object that indicates success or failure of the command execution.
     """
 
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+    if not Collection.is_list(args, str):
+        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
+                                           message=f"Expected get list of strings but got {type(args).__name__}."))
+
     logger.debug(f"Command: d8 {' '.join(args)}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")
     os.system(f"d8 {' '.join(args)}")
@@ -120,6 +126,12 @@ def command_shell(logger: logging.Logger, args: Optional[List[str]]) -> Result:
     These arguments will be added to the default_options list and used as options for the D8 Shell command
     :type args: Optional[List[str]]
     """
+
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+    if not Collection.is_list(args, str):
+        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
+                                           message=f"Expected get list of strings but got {type(args).__name__}."))
 
     default_options = ['--harmony', '--allow-natives-syntax']
     bash_command = ['sleep 0.5;', 'rlwrap', '-m', '-pgreen', 'd8'] + default_options + args
@@ -145,6 +157,12 @@ def command_bash(logger: logging.Logger, args: Optional[List[str]]) -> Result:
     :type args: Optional[List[str]]
     """
 
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+    if not Collection.is_list(args, str):
+        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
+                                           message=f"Expected get list of strings but got {type(args).__name__}."))
+
     command_str = f"bash {' '.join(args)}"
     logger.debug(f"Command: {command_str}")
     logger.info("Running bash command. Use --help to see other commands.")
@@ -164,6 +182,13 @@ def command_samples(logger: logging.Logger, environments: DockerEnvironments) ->
     information about the Docker environment being used, such as the Docker image name
     :type environments: DockerEnvironments
     """
+
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+    if not environments or not isinstance(environments, DockerEnvironments):
+        return Result.fail(ValidationError(title="The 'environments' parameter is not valid",
+                                           message="The 'environments' parameter is required and must be "
+                                                   "an instance of `DockerEnvironments`."))
 
     result = "Use -h or --help for more information about commands.\n"
     result += "Samples:\n"
@@ -196,5 +221,12 @@ def command_about(logger: logging.Logger, environments: DockerEnvironments) -> R
     information about the program or application being executed
     :type environments: DockerEnvironments
     """
+
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+    if not environments or not isinstance(environments, DockerEnvironments):
+        return Result.fail(ValidationError(title="The 'environments' parameter is not valid",
+                                           message="The 'environments' parameter is required and must be "
+                                                   "an instance of `DockerEnvironments`."))
 
     return log_class_properties(logger, logging.INFO, environments, "About")

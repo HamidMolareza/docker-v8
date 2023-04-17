@@ -241,5 +241,5 @@ def command_about(logger: logging.Logger, environments: DockerEnvironments) -> R
                                            message="The 'environments' parameter is required and must be "
                                                    "an instance of `DockerEnvironments`."))
 
-    logger.info(class_properties_to_str(environments, title="About"))
-    return Result.ok()
+    return class_properties_to_str(environments, title="About") \
+        .on_success(lambda about_message: logger.info(about_message))

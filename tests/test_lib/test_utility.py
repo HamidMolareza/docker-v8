@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from on_rails import (Result, ValidationError, assert_error_detail,
@@ -17,6 +18,13 @@ class TestUtility(unittest.TestCase):
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
                             expected_message="The logger is required.", expected_code=400)
+
+    def test_log_result_give_none_result(self):
+        result = log_result(logging.getLogger(), None)
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The result parameter is not valid.",
+                            expected_message="The result parameter is required and must be an instance of Result.", expected_code=400)
 
     def test_log_result_give_success(self):
         logger, logging_stream = get_logger()

@@ -36,6 +36,9 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
 
     if not logger:
         return Result.fail(ValidationError(message="The logger is required."))
+    if not result or not isinstance(result, Result):
+        return Result.fail(ValidationError(title="The result parameter is not valid.",
+                                           message="The result parameter is required and must be an instance of Result."))
 
     return result \
         .on_success_operate_when(lambda value: value is not None, lambda value: logger.info(value)) \

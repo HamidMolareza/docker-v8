@@ -144,6 +144,10 @@ def convert_code_to_result(code: int) -> Result:
     :type code: int
     """
 
+    if code is None or not isinstance(code, int):
+        return Result.fail(ValidationError(title="The code parameter is not valid.",
+                                           message="The code parameter is required and must be an integer."))
+
     if code == 0:
         return Result.ok()
     return Result.fail(FailResult(code=code))

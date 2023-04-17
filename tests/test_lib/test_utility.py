@@ -6,9 +6,10 @@ from on_rails import (Result, ValidationError, assert_error_detail,
 
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from docker_entrypoint._libs.utility import (class_properties_to_str,
+                                             convert_code_to_result,
                                              get_support_message, log_error,
                                              log_result)
-from tests._helpers import get_logger
+from tests._helpers import assert_fail_result_detail, get_logger
 
 
 class TestUtility(unittest.TestCase):
@@ -173,6 +174,25 @@ class TestUtility(unittest.TestCase):
         assert_result(self, result, expected_success=True, expected_value="message:\n"
                                                                           "\tprop1: prop1\n"
                                                                           "\tprop2: prop2\n")
+
+    # endregion
+
+    # region convert_code_to_result
+
+    def test_convert_code_to_result_invalid_code(self):
+        result = convert_code_to_result(None)
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="The code parameter is not valid.",
+                            expected_message="The code parameter is required and must be an integer.",
+                            expected_code=400)
+
+    def test_convert_code_to_result(self):
+        result = convert_code_to_result(5)
+        assert_fail_result_detail(self, result.detail, expected_code=5)
+
+        result = convert_code_to_result(0)
+        assert_result(self, result, expected_success=True)
+
 
     # endregion
 

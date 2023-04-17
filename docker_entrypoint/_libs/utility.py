@@ -39,7 +39,10 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
 
     return result \
         .on_success_operate_when(lambda value: value is not None, lambda value: logger.info(value)) \
-        .on_fail(lambda prev_result: log_error(logger, prev_result))
+        .on_fail_operate_when(lambda prev_result: prev_result.detail and prev_result.detail.is_instance_of(FailResult),
+                              lambda prev_result: logger.error(str(prev_result.detail)), break_rails=True
+                              ) \
+        .on_fail_tee(lambda prev_result: log_error(logger, prev_result))
 
 
 @def_result()
@@ -59,7 +62,7 @@ def log_error(logger: logging.Logger, fail_result: Result) -> Result:
         return Result.fail(detail=ValidationError(message="Expected failure result but got success result!",
                                                   more_data=[fail_result]))
 
-    logger.error(f"An error occurred:\n{repr(fail_result)}\n")
+    logger.error(f"An error occurred:\n{repr(fail_result.detail)}\n")
     return get_support_message() \
         .on_success(lambda support_message:
                     logger.info(f"Please report this error to help others who use this program.\n{support_message}")

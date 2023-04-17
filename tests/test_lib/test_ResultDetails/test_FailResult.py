@@ -14,6 +14,13 @@ class TestFailResult(unittest.TestCase):
         assert detail.title == "Operation failed with code 5."
         self.assertIsNone(detail.message)
 
+    def test_str_without(self):
+        string = str(FailResult(5))
+        self.assertEqual("Operation failed with code 5.", string)
+
+        string = str(FailResult(5, message="message"))
+        self.assertEqual("Operation failed with code 5.\nmessage\n", string)
+
 
 if __name__ == '__main__':
     unittest.main()

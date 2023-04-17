@@ -11,7 +11,7 @@ class Logger:
     _logger: Optional[logging.Logger] = None
 
     @staticmethod
-    def get(name: str):
+    def get(name: Optional[str] = None):
         """
         Returns a logger object with a specified name and adds a console handler to it if it doesn't already
         exist.

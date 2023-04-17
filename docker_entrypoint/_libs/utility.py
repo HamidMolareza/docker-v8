@@ -34,6 +34,9 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
     :type result: Result
     """
 
+    if not logger:
+        return Result.fail(ValidationError(message="The logger is required."))
+
     return result \
         .on_success_operate_when(lambda value: value is not None, lambda value: logger.info(value)) \
         .on_fail(lambda prev_result: log_error(logger, prev_result))

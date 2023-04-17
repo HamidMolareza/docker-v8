@@ -26,7 +26,11 @@ def main():
         .on_success(lambda parser: (parser.parse_known_args(), parser)) \
         .on_fail_break_function() \
         .on_success(lambda values: run(values[0], values[1])) \
-        .finally_tee(lambda prev_result: log_result(logger, prev_result))
+        .finally_tee(lambda prev_result: log_result(logger, prev_result)
+                     .on_fail(lambda res: logger.error("An error occurred while logging Result.\n"
+                                                       f"Current Error: {res}\n"
+                                                       f"Previous Result: {prev_result}"))
+                     )
     if result.success:
         raise SystemExit(0)
     raise SystemExit(result.code())

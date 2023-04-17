@@ -4,7 +4,6 @@ from typing import Optional
 from on_rails import Result, ValidationError, def_result
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
-from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 D8_Recommended_OPTIONS = {
     '--harmony': 'Enables support for some of the experimental ES6 features that are not yet fully standardized',
@@ -34,15 +33,9 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
     :type result: Result
     """
 
-    if result.success:
-        return result
-    if result.detail and isinstance(result.detail, FailResult):
-        return result
-
-    log_error(logger, result) \
-        .on_fail(lambda prev_result:
-                 print(f"Error while logging details:\n{logger.error(repr(prev_result))}"))
-    return result
+    return result \
+        .on_success_operate_when(lambda value: value is not None, lambda value: logger.info(value)) \
+        .on_fail(lambda prev_result: log_error(logger, prev_result))
 
 
 @def_result()

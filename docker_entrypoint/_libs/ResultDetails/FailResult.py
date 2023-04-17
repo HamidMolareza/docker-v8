@@ -7,5 +7,5 @@ class FailResult(ResultDetail):
     This class is used for handled errors.
     """
 
-    def __init__(self, code: int):
-        super().__init__(title=f"Operation failed with code {code}.", code=code)
+    def __init__(self, code: int, message: str):
+        super().__init__(title=f"Operation failed with code {code}.", code=code, message=message)

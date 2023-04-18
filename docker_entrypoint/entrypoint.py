@@ -2,6 +2,8 @@ import logging
 from typing import List, Optional
 
 from on_rails import Result, def_result
+from schema import Optional as Opt
+from schema import Or, Schema
 
 from docker_entrypoint._libs.cli_parser import create_cli_parser
 from docker_entrypoint._libs.commands import (command_about, command_bash,
@@ -11,7 +13,8 @@ from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.Logger import Logger
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import class_properties_to_str, log_result
+from docker_entrypoint._libs.utility import (class_properties_to_str,
+                                             log_result, try_validation)
 
 
 def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = None) -> int:
@@ -20,9 +23,6 @@ def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = No
     the result.
     """
 
-    if not logger:
-        logger = Logger.get(__name__)
-
     result = _inner_main(logger, args)
     if result.success:
         return 0
@@ -30,7 +30,19 @@ def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = No
 
 
 @def_result()
-def _inner_main(logger: logging.Logger, args: Optional[List[str]] = None) -> Result:
+def _inner_main(logger: Optional[logging.Logger] = None, args: Optional[List[str]] = None) -> Result:
+    schema = Schema({
+        Opt('args'): Or(None, [str]),
+        Opt('logger'): Or(None, logging.Logger),
+    })
+    validation = try_validation(lambda: schema.validate({'args': args, 'logger': logger})) \
+        .on_fail_tee(lambda result: print(result.detail))
+    if not validation.success:
+        return validation
+
+    if not logger:
+        logger = Logger.get(__name__)
+
     return create_cli_parser() \
         .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
         .on_fail_break_function() \

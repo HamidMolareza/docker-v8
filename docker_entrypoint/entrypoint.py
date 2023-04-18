@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 from on_rails import Result, def_result
@@ -12,40 +13,52 @@ from docker_entrypoint._libs.Logger import Logger
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from docker_entrypoint._libs.utility import class_properties_to_str, log_result
 
-logger = Logger.get(__name__)
 
-
-def main(args: Optional[List[str]] = None) -> int:
+def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = None) -> int:
     """
     This is a main function that creates a command-line interface parser, parses the arguments, runs the program, and logs
     the result.
     """
 
-    result = create_cli_parser() \
-        .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
-        .on_fail_break_function() \
-        .on_success(lambda values: run(values[0], values[1])) \
-        .finally_tee(lambda prev_result: log_result(logger, prev_result)
-                     .on_fail(lambda res: logger.error("An error occurred while logging Result.\n"
-                                                       f"Current Error: {res}\n"
-                                                       f"Previous Result: {prev_result}"))
-                     )
+    if not logger:
+        logger = Logger.get(__name__)
+
+    result = _inner_main(logger, args)
     if result.success:
         return 0
     return result.code()
 
 
 @def_result()
-def run(arguments, parser) -> Result:
+def _inner_main(logger: logging.Logger, args: Optional[List[str]] = None) -> Result:
+    return create_cli_parser() \
+        .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
+        .on_fail_break_function() \
+        .on_success(lambda values: run(values[0], values[1], logger)) \
+        .finally_tee(lambda prev_result: log_result(logger, prev_result)
+                     .on_fail(lambda res: logger.error("An error occurred while logging Result.\n"
+                                                       f"Current Error: {res}\n"
+                                                       f"Previous Result: {prev_result}"))
+                     )
+
+
+@def_result()
+def run(arguments, parser, logger: logging.Logger) -> Result:
     """
-    The function sets the logger level, gets Docker environments, logs debug information, and runs a command with
-    the given arguments and environments.
+    This function runs a command with given arguments and logs information about Docker environments and known parameters.
 
-    :param arguments: The `arguments` parameter is a tuple containing two elements: known_params and others
+    :param arguments: The `arguments` parameter is a tuple containing two elements: `known_params` and `args`.
+    `known_params` is a namespace object containing the parsed command-line arguments that were recognized by the parser,
+    while `args` is a list of positional arguments that were not recognized by the parser
 
-    :param parser: It is an instance of the argparse.ArgumentParser class, which is used to parse command-line
-    arguments and options. It is used to define the expected arguments and options for the script and to generate
-    help messages
+    :param parser: `parser` is an instance of the `argparse.ArgumentParser` class, which is used to define and parse
+    command-line arguments for the script. It is typically used to define the expected arguments and options, and to
+    generate help messages and usage information
+
+    :param logger: The logger parameter is an instance of the logging.Logger class, which is used for logging messages
+    during the execution of the run function. It allows the function to output messages of different levels (e.g. debug,
+    info, warning, error) to a specified output stream
+    :type logger: logging.Logger
     """
 
     known_params, args = arguments
@@ -54,14 +67,14 @@ def run(arguments, parser) -> Result:
 
     return DockerEnvironments.get_environments() \
         .on_success_tee(lambda environments:
-                        logger.debug(class_properties_to_str(environments, "Environments"))
-                        .on_success(lambda: logger.debug(f"known params: {known_params}\nArgs: {args}"))
+                        (logger.debug(class_properties_to_str(environments, "Environments")),
+                         logger.debug(f"known params: {known_params}\nArgs: {args}"))
                         ) \
-        .on_success(lambda environments: _run(known_params, args, parser, environments))
+        .on_success(lambda environments: _run(known_params, args, parser, environments, logger))
 
 
 @def_result()
-def _run(known_params, args, parser, environments: DockerEnvironments) -> Result:
+def _run(known_params, args, parser, environments: DockerEnvironments, logger: logging.Logger) -> Result:
     """
     Processes commands and arguments passed to it and executes the corresponding command function.
 

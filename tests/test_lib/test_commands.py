@@ -208,15 +208,16 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The logger is required.", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object",
+                            expected_code=400)
 
     def test_command_samples_not_give_environments(self):
         result = command_samples(logging.getLogger(), None)
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-        assert_error_detail(self, result.detail, expected_title="The 'environments' parameter is not valid",
-                            expected_message="The 'environments' parameter is required and must be "
-                                             "an instance of `DockerEnvironments`.", expected_code=400)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="environments is required and must be an instance of `DockerEnvironments`",
+                            expected_code=400)
 
     def test_command_samples_ok(self):
         logger, logging_stream = get_logger()

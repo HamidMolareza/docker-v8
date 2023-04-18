@@ -249,12 +249,13 @@ def command_about(logger: logging.Logger, environments: DockerEnvironments) -> R
     :type environments: DockerEnvironments
     """
 
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-    if not environments or not isinstance(environments, DockerEnvironments):
-        return Result.fail(ValidationError(title="The 'environments' parameter is not valid",
-                                           message="The 'environments' parameter is required and must be "
-                                                   "an instance of `DockerEnvironments`."))
+    schema = Schema({
+        'logger': And(logging.Logger, error='logger is required and must be a logging.Logger object'),
+        'environments': And(DockerEnvironments,
+                            error='environments is required and must be an instance of `DockerEnvironments`')
+    })
+    try_validation(lambda: schema.validate({'logger': logger, 'environments': environments})) \
+        .on_fail_break_function()
 
     return class_properties_to_str(environments, title="About") \
         .on_success(lambda about_message: logger.info(about_message))

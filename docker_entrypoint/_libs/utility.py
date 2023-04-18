@@ -42,12 +42,19 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
                                            message="The result parameter is required and must be "
                                                    "an instance of Result."))
 
-    return result \
-        .on_success_operate_when(lambda value: value is not None, lambda value: logger.info(value)) \
-        .on_fail_operate_when(lambda prev_result: prev_result.detail and prev_result.detail.is_instance_of(FailResult),
-                              lambda prev_result: logger.error(str(prev_result.detail)), break_rails=True
-                              ) \
-        .on_fail_tee(lambda prev_result: log_error(logger, prev_result))
+    if result.success:
+        if result.value is not None:
+            logger.info(result if result.detail else result.value)
+        return Result.ok()
+
+    if result.detail is None:
+        return Result.ok()  # No data to display
+
+    if isinstance(result.detail, FailResult):
+        logger.error(str(result.detail))
+        return Result.ok()
+    log_error(logger, result)
+    return Result.ok()
 
 
 @def_result()

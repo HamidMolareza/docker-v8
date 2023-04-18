@@ -33,9 +33,8 @@ class TestUtility(unittest.TestCase):
     def test_log_result_give_success(self):
         logger, logging_stream = get_logger()
 
-        result = Result.ok()
-        func_result = log_result(logger, result)
-        self.assertEqual(result, func_result)
+        func_result = log_result(logger, Result.ok())
+        assert_result(self, func_result, expected_success=True)
         self.assertEqual("", logging_stream.getvalue())
 
     def test_log_result_give_success_with_value(self):
@@ -45,19 +44,18 @@ class TestUtility(unittest.TestCase):
         assert_result(self, target_result=func_result, expected_success=True)
         self.assertEqual("[INFO] value\n", logging_stream.getvalue())
 
-    def test_log_result_expected_fail(self):
+    def test_log_result_expected_error(self):
         logger, logging_stream = get_logger()
 
-        func_result = log_result(logger, Result.fail(FailResult(code=5, message="message")))
-        assert_result(self, target_result=func_result, expected_success=False)
+        result = log_result(logger, Result.fail(FailResult(code=5, message="message")))
+        assert_result(self, target_result=result, expected_success=True)
         self.assertEqual("[ERROR] Operation failed with code 5.\nmessage\n\n", logging_stream.getvalue())
 
-    def test_log_result_unexpected_fail(self):
+    def test_log_result_unexpected_error(self):
         logger, logging_stream = get_logger()
 
-        func_result = log_result(logger, Result.fail(ValidationError()))
-        assert_result_with_type(self, target_result=func_result,
-                                expected_success=False, expected_detail_type=ValidationError)
+        result = log_result(logger, Result.fail(ValidationError()))
+        assert_result(self, target_result=result, expected_success=True)
         self.assertIn("Title: One or more validation errors occurred\nCode: 400\nStack trace:",
                       logging_stream.getvalue())
         self.assertIn("[INFO] Please report this error to help others who use this program.\n"
@@ -68,6 +66,13 @@ class TestUtility(unittest.TestCase):
                       "\tRepository: No Data!\n"
                       "\tReport Bug: No Data!",
                       logging_stream.getvalue())
+
+    def test_log_result_unexpected_error_without_detail(self):
+        logger, logging_stream = get_logger()
+        result = log_result(logger, Result.fail())
+
+        assert_result(self, result, expected_success=True)
+        assert logging_stream.getvalue() == ''
 
     # endregion
 

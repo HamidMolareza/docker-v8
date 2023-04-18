@@ -5,12 +5,16 @@ from typing import List, Optional
 from on_rails import Result, ValidationError, def_result
 from pylity import Path
 from pylity.Collection import Collection
+from schema import And
+from schema import Optional as Opt
+from schema import Or, Schema
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from docker_entrypoint._libs.utility import (class_properties_to_str,
-                                             convert_code_to_result)
+                                             convert_code_to_result,
+                                             try_validation)
 
 
 @def_result()
@@ -38,6 +42,16 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
     `Result.fail(FailResult(code=ExitCode.IO_ERROR))` or `result` depending on the value
     of `result` in the function.
     """
+
+    schema = Schema({
+        'logger': And(logging.Logger, error='logger is required and must be a logging.Logger object'),
+        'program': And(str, error='program is required and must be a string'),
+        Opt('files_and_dirs'): Or(None, [str], error='files_and_dirs must be a list of strings or None'),
+        Opt('args'): Or(None, [str], error='args must be a list of strings or None'),
+    })
+    try_validation(lambda: schema.validate({'logger': logger, 'program': program,
+                                            'files_and_dirs': files_and_dirs, 'args': args})) \
+        .on_fail_break_function()
 
     if not logger:
         return Result.fail(ValidationError(message="The logger is required."))

@@ -1,14 +1,16 @@
 import logging
 import unittest
 
-from on_rails import (Result, ValidationError, assert_error_detail,
-                      assert_result, assert_result_with_type)
+from on_rails import (ErrorDetail, Result, ValidationError,
+                      assert_error_detail, assert_result,
+                      assert_result_with_type)
+from schema import SchemaError
 
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from docker_entrypoint._libs.utility import (class_properties_to_str,
                                              convert_code_to_result,
                                              get_support_message, log_error,
-                                             log_result)
+                                             log_result, try_validation)
 from tests._helpers import assert_fail_result_detail, get_logger
 
 
@@ -196,6 +198,46 @@ class TestUtility(unittest.TestCase):
         assert_fail_result_detail(self, result.detail, expected_code=5)
 
         result = convert_code_to_result(0)
+        assert_result(self, result, expected_success=True)
+
+    # endregion
+
+    # region try_validation
+
+    def test_try_validation_give_non_callable(self):
+        result = try_validation('not callable')
+
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The input function is not valid.", expected_code=400)
+
+    def test_try_validation_raise_validation_error(self):
+        def validation_failed():
+            raise SchemaError("fake")
+
+        result = try_validation(validation_failed)
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="fake", expected_code=400)
+
+    def test_try_validation_raise_not_validation_error(self):
+        exception = TypeError("fake")
+
+        def validation_failed():
+            raise exception
+
+        result = try_validation(validation_failed)
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ErrorDetail)
+        assert_error_detail(self, result.detail, expected_title="An error occurred",
+                            expected_message="Operation failed with 1 attempts. The details of the 1 errors are "
+                                             "stored in the more_data field. At least one of the errors was "
+                                             "an exception type, the first exception being stored in the "
+                                             "exception field.",
+                            expected_code=500,
+                            expected_more_data=[exception], expected_exception=exception)
+
+    def test_try_validation_not_raise_any_exception(self):
+        result = try_validation(lambda: None)
         assert_result(self, result, expected_success=True)
 
     # endregion

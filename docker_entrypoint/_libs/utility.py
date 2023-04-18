@@ -1,8 +1,9 @@
 import logging
-from typing import Optional
+from typing import Callable, Optional
 
-from on_rails import Result, ValidationError, def_result
+from on_rails import Result, ValidationError, def_result, try_func
 from pylity import String
+from schema import SchemaError
 
 from docker_entrypoint._libs.docker_environments import DockerEnvironments
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
@@ -158,3 +159,28 @@ def convert_code_to_result(code: int) -> Result:
     if code == 0:
         return Result.ok()
     return Result.fail(FailResult(code=code))
+
+
+@def_result()
+def try_validation(validation_func: Callable) -> Result:
+    """
+    It executes the validation_func function. If an SchemaError is raised, it returns the error result
+    with ValidationError. If there is an exception other than SchemaError, it returns the error details
+    from the ErrorDetail type. If successful, it returns Result.ok().
+
+    :param validation_func: The parameter `validation_func` is a callable function that returns schema.Schema and
+    maybe raise an exception like SchemaError. For example: lambda: schema.validate(...)
+    :type validation_func: Callable
+
+    :return: The function `try_validation` returns a `Result` object. If the `try_func` call within the function
+    `try_validation` raises a `SchemaError` exception, the function returns a `Result` object with a `ValidationError`
+    message. Otherwise, it returns the `Result` object returned by the `try_func` call.
+    """
+
+    result = try_func(validation_func)
+    if result.success:
+        return result
+
+    if result.detail and result.detail.exception and isinstance(result.detail.exception, SchemaError):
+        return Result.fail(ValidationError(message=str(result.detail.exception)))
+    return result

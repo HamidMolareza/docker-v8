@@ -24,7 +24,7 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The logger is required.", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
 
     def test_command_run_give_invalid_program(self):
         result = command_run(logging.getLogger(), "invalid")
@@ -41,14 +41,14 @@ class TestCommands(unittest.TestCase):
 
             result = command_run(logging.getLogger(), file, "not list")
             assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-            assert_error_detail(self, result.detail, expected_title="The 'files_and_dirs' parameter is not valid.",
-                                expected_message="Expected get list of strings but got str.",
+            assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                                expected_message="files_and_dirs must be a list of strings or None",
                                 expected_code=400)
 
             result = command_run(logging.getLogger(), file, None, "not list")
             assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-            assert_error_detail(self, result.detail, expected_title="The 'args' parameter is not valid.",
-                                expected_message="Expected get list of strings but got str.",
+            assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                                expected_message="args must be a list of strings or None",
                                 expected_code=400)
 
     def test_command_run_give_invalid_path(self):

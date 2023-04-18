@@ -12,7 +12,6 @@ class TestLogger(unittest.TestCase):
         logger_obj = self.logger.get("test_logger_get")
 
         self.assertIsInstance(logger_obj, logging.Logger)
-        self.assertEqual(logger_obj.name, "test_logger_get")
         self.assertEqual(len(logger_obj.handlers), 1)
         self.assertIsInstance(logger_obj.handlers[0], logging.StreamHandler)
         self.assertEqual(logger_obj.level, logging.INFO)

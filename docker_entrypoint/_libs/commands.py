@@ -53,9 +53,6 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
                                             'files_and_dirs': files_and_dirs, 'args': args})) \
         .on_fail_break_function()
 
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-
     if not os.path.isfile(program):
         return Result.fail(FailResult(code=ExitCode.IO_ERROR, message=f"File '{program}' does not exists."))
 
@@ -116,11 +113,12 @@ def command_d8(logger: logging.Logger, args: Optional[List[str]] = None) -> Resu
     :return: a `Result` object that indicates success or failure of the command execution.
     """
 
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-    if not Collection.is_list(args, str):
-        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
-                                           message=f"Expected get list of strings but got {type(args).__name__}."))
+    schema = Schema({
+        'logger': And(logging.Logger, error='logger is required and must be a logging.Logger object'),
+        Opt('args'): Or(None, [str], error='args must be a list of strings or None'),
+    })
+    try_validation(lambda: schema.validate({'logger': logger, 'args': args})) \
+        .on_fail_break_function()
 
     logger.debug(f"Command: d8 {' '.join(args)}")
     logger.info("Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell")

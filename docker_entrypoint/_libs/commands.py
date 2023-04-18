@@ -177,11 +177,12 @@ def command_bash(logger: logging.Logger, args: Optional[List[str]] = None) -> Re
     :type args: Optional[List[str]]
     """
 
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-    if not Collection.is_list(args, str):
-        return Result.fail(ValidationError(title="The 'args' parameter is not valid.",
-                                           message=f"Expected get list of strings but got {type(args).__name__}."))
+    schema = Schema({
+        'logger': And(logging.Logger, error='logger is required and must be a logging.Logger object'),
+        Opt('args'): Or(None, [str], error='args must be a list of strings or None'),
+    })
+    try_validation(lambda: schema.validate({'logger': logger, 'args': args})) \
+        .on_fail_break_function()
 
     command_str = f"bash {' '.join(args)}"
     logger.debug(f"Command: {command_str}")

@@ -153,13 +153,13 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The logger is required.", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
 
     def test_command_shell_give_invalid_list(self):
         result = command_shell(logging.getLogger(), "not list")
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-        assert_error_detail(self, result.detail, expected_title="The 'args' parameter is not valid.",
-                            expected_message="Expected get list of strings but got str.",
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="args must be a list of strings or None",
                             expected_code=400)
 
     def test_command_shell_with_args(self):

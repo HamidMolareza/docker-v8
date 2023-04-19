@@ -1,3 +1,4 @@
+import logging
 import os
 import tempfile
 import unittest
@@ -30,6 +31,7 @@ class TestEntrypoint(unittest.TestCase):
 
     def test_main_base_flags(self):
         logger, logging_stream = get_logger()
+        logger.setLevel(logging.INFO)
         code = main(['--version'], logger)
         assert code == 0
         self.assertEqual('[INFO] Program Version: latest\n', logging_stream.getvalue())
@@ -103,6 +105,17 @@ class TestEntrypoint(unittest.TestCase):
                 f"[ERROR] Operation failed with code {code}.", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
+            code = main(f'--debug run {program_file} arg1 arg2 -f {file1}'.split(' '), logger)
+            self.assertIn(
+                f"[DEBUG] known params: Namespace(command='run', debug=True, directory=None, file=['{file1}'], program='{program_file}', version=False)\n"
+                "Args: ['arg1', 'arg2']\n"
+                "[DEBUG] Number of input files: 1\n"
+                f"[INFO] file 1: {file1}\n"
+                f"[DEBUG] command: bash -c 'd8 {program_file} arg1 arg2 < {file1}'\n"
+                f"[DEBUG] Return Code: {code}\n"
+                f"[ERROR] Operation failed with code {code}.", logging_stream.getvalue())
+
+            logger, logging_stream = get_logger()
             code = main(f'--debug run {program_file} -f {file1} -d invalid'.split(' '), logger)
             self.assertIn(
                 f"[DEBUG] known params: Namespace(command='run', debug=True, directory=['invalid'], file=['{file1}'], program='{program_file}', version=False)\n"
@@ -124,6 +137,69 @@ class TestEntrypoint(unittest.TestCase):
                 f"[DEBUG] command: bash -c 'd8 {program_file}  < {file1}'\n"
                 f"[DEBUG] Return Code: {code}\n"
                 f"[ERROR] Operation failed with code {code}.", logging_stream.getvalue())
+
+    def test_main_shell_command(self):
+        logger, logging_stream = get_logger()
+        logger.setLevel(logging.INFO)
+        code = main('shell'.split(' '), logger)
+        self.assertIn("[INFO] Default options: ['--harmony', '--allow-natives-syntax']\n"
+                      "[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n"
+                      f"[ERROR] Operation failed with code {code}.\n", logging_stream.getvalue())
+
+        logger, logging_stream = get_logger()
+        code = main('--debug shell'.split(' '), logger)
+        self.assertIn(
+            "[DEBUG] known params: Namespace(allow_natives_syntax=False, command='shell', debug=True, "
+            "harmony=False, log_gc=False, log_timer_events=False, print_bytecode=False, print_opt_code=False, "
+            "prof=False, trace=False, trace_deopt=False, trace_ic=False, trace_opt=False, version=False)\n"
+            "Args: []\n"
+            "[DEBUG] Command: bash -c 'sleep 0.5; rlwrap -m -pgreen d8 --harmony --allow-natives-syntax'\n"
+            "[INFO] Default options: ['--harmony', '--allow-natives-syntax']\n"
+            "[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n"
+            f"[DEBUG] Return code: {code}\n"
+            f"[ERROR] Operation failed with code {code}.\n", logging_stream.getvalue())
+
+        logger, logging_stream = get_logger()
+        code = main('--debug shell -a arg1 arg2'.split(' '), logger)
+        self.assertIn("Args: ['-a', 'arg1', 'arg2']\n"
+                      "[DEBUG] Command: bash -c 'sleep 0.5; rlwrap -m -pgreen d8 --harmony --allow-natives-syntax -a arg1 arg2'\n"
+                      "[INFO] Default options: ['--harmony', '--allow-natives-syntax']\n"
+                      "[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n"
+                      f"[DEBUG] Return code: {code}\n"
+                      f"[ERROR] Operation failed with code {code}.\n", logging_stream.getvalue())
+
+    def test_main_bash_command(self):
+        logger, logging_stream = get_logger()
+        code = main('--debug bash -a arg1 arg2'.split(' '), logger)
+        self.assertIn("[DEBUG] known params: Namespace(command='bash', debug=True, version=False)\n"
+                      "Args: ['-a', 'arg1', 'arg2']\n"
+                      "[DEBUG] Command: bash -a arg1 arg2\n"
+                      "[INFO] Running bash command. Use --help to see other commands.\n"
+                      f"[DEBUG] Return code: {code}\n"
+                      f"[ERROR] Operation failed with code {code}.\n", logging_stream.getvalue())
+
+    def test_main_d8_command(self):
+        logger, logging_stream = get_logger()
+        code = main('--debug d8 -a arg1 arg2'.split(' '), logger)
+        self.assertIn("Args: ['-a', 'arg1', 'arg2']\n"
+                      "[DEBUG] Command: d8 -a arg1 arg2\n"
+                      "[INFO] Use quit() or Ctrl-D (i.e. EOF) to exit the D8 Shell\n"
+                      f"[DEBUG] Return code: {code}\n"
+                      f"[ERROR] Operation failed with code {code}.", logging_stream.getvalue())
+
+    def test_main_samples_command(self):
+        code = main('samples'.split(' '))
+        assert code == 0
+
+    def test_main_about_command(self):
+        code = main('--debug about'.split(' '))
+        assert code == 0
+
+    def test_main_invalid_command(self):
+        try:
+            main('--debug invalid-command'.split(' '))
+        except SystemExit as e:
+            assert e.code == 2  # program param is required
 
 
 if __name__ == '__main__':

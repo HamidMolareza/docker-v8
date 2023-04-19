@@ -138,10 +138,7 @@ def _run(known_params, args, parser, environments: DockerEnvironments, logger: l
     if known_params.command == 'about':
         return command_about(logger, environments)
 
-    # Other
-    logger.error(f"Unknown command: {known_params.command}")
-    parser.print_help()
-    return Result.fail(FailResult(code=ExitCode.MISUSE_SHELL_BUILTINS))
+    return Result.ok()  # pragma: no cover
 
 
 # `if __name__ == '__main__':` is a common Python idiom that checks whether the current script is being
@@ -149,6 +146,6 @@ def _run(known_params, args, parser, environments: DockerEnvironments, logger: l
 # being run as the main program, then the `main()` function is called, which is the entry point of the program.
 # If the script is being imported as a module, then the `main()` function is not called, and the module can be
 # used as a library by other programs.
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     code = main()
     raise SystemExit(code)

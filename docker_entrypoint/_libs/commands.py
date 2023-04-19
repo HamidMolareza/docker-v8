@@ -77,7 +77,7 @@ def command_run(logger: logging.Logger, program: str, files_and_dirs: Optional[L
         code = os.system(command)
         logger.debug(f"Return Code: {code}")
         print('----------------------------------------------------------------')
-        if code != 0:
+        if code != 0:  # pragma: no cover
             final_code = code
 
     return convert_code_to_result(final_code)

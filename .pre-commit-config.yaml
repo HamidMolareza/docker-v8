@@ -48,3 +48,10 @@ repos:
         stages: [ push ]
         pass_filenames: false
         verbose: false
+
+      - id: run-scripts
+        name: update-poetry-dependencies
+        args: [ "-f=.hooks/update-poetry-dependencies.sh"]
+        stages: [ push ]
+        pass_filenames: false
+        verbose: false

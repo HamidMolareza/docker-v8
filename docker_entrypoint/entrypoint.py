@@ -22,7 +22,11 @@ def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = No
     the result.
     """
 
-    result = _inner_main(logger, args)
+    result = _inner_main(args, logger)
+
+    if not result.success and result.detail and not result.detail.is_instance_of(FailResult):
+        print(repr(result))  # Print unexpected error
+
     if result.success:
         return 0
     return result.code()
@@ -33,7 +37,7 @@ def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = No
     'logger': Or(None, logging.Logger, error='The logger must be None or type of logging.Logger'),
     'args': Or(None, [str], error='The args must be None or be a list of strings'),
 }))
-def _inner_main(logger: Optional[logging.Logger] = None, args: Optional[List[str]] = None) -> Result:
+def _inner_main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = None) -> Result:
     if not logger:
         logger = Logger.get(__name__) \
             .on_fail_break_function() \
@@ -41,13 +45,14 @@ def _inner_main(logger: Optional[logging.Logger] = None, args: Optional[List[str
 
     return create_cli_parser() \
         .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
-        .on_fail_break_function() \
         .on_success(lambda values: run(values[0], values[1], logger)) \
         .finally_tee(lambda prev_result: log_result(logger, prev_result)
                      .on_fail(lambda res: logger.error("An error occurred while logging Result.\n"
                                                        f"Current Error: {res}\n"
                                                        f"Previous Result: {prev_result}"))
-                     )
+                     ) \
+        .on_fail_new_detail(lambda prev_result: FailResult(code=prev_result.code())) \
+        .on_success_new_detail(None)
 
 
 @def_result()
@@ -136,7 +141,7 @@ def _run(known_params, args, parser, environments: DockerEnvironments, logger: l
     # Other
     logger.error(f"Unknown command: {known_params.command}")
     parser.print_help()
-    return Result.ok()
+    return Result.fail(FailResult(code=ExitCode.MISUSE_SHELL_BUILTINS))
 
 
 # `if __name__ == '__main__':` is a common Python idiom that checks whether the current script is being

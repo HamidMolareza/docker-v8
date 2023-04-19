@@ -1,12 +1,12 @@
 from typing import Optional
 
-from on_rails import ResultDetail
+from on_rails import ErrorDetail
 from pylity import String
 from pylity.decorators.validate_func_params import validate_func_params
 from schema import And, Or, Schema
 
 
-class FailResult(ResultDetail):
+class FailResult(ErrorDetail):
     """
     Represents a failed operation with a specific error code.
     This class is used for handled errors.

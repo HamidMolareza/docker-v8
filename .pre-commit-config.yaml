@@ -36,7 +36,7 @@ repos:
     rev: v2.14.5
     hooks:
       - id: pylint
-        args: [ 'docker_entrypoint/' ]
+        args: [ 'docker_entrypoint/', '--ignore=requirements.py' ]
         exclude: tests/  # Prevent files in tests/ to be passed in to pylint.
 
   - repo: https://github.com/Payadel/pre-commit-hooks

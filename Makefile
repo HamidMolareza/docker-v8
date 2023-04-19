@@ -27,7 +27,7 @@ clean:  ## Remove the Docker image
 deploy: clean build push  ## Deploy means: clean build push
 
 update-poetry-dependencies:  ## Update poetry dependencies
-	cat requirements.txt | xargs poetry add
+	xargs poetry add < requirements.txt
 
 # Targets for running workflow commands
 watch-actions: ## Watch a run until it completes, showing its progress
@@ -46,6 +46,8 @@ build-push-docker: ## Build and Push the Docker image
 version: ## Get current program version
 	node -p -e "require('./package.json').version"
 
+coverage-action:  ## Generate coverage report
+	gh workflow run 'Coverage Report' --ref $(REF)
 
 # Help section
 help:  ## Display help message

@@ -1,0 +1,65 @@
+name: Coverage Report
+
+on:
+  push:
+    tags:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pip install coverage
+
+    - name: Run tests and generate coverage report
+      run: |
+        coverage run --source=PACKAGE_NAME --branch -m pytest tests
+        [ -f coverage.md ] && rm coverage.md
+        coverage report -m --skip-empty --format=markdown >> coverage.md
+
+    - name: Read Report
+      id: report
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const fs = require('fs');
+          const fileContents = fs.readFileSync('coverage.md', 'utf8');
+          core.setOutput('coverage_report', fileContents);
+
+    - name: Read Latest Tag
+      id: latest-tag
+      uses: actions/github-script@v5
+      with:
+        script: |
+          await exec.getExecOutput("git fetch --tags")
+          .then(()=> exec.getExecOutput('/bin/bash -c "git describe --tags $(git rev-list --tags --max-count=1)"'))
+          .then(result => result.stdout.trim())
+          .then(latestTag => {
+            core.info(`Latest Tag: ${latestTag}`);
+            core.setOutput('latestTag', latestTag)
+          });
+
+    - name: Coverage Report Pull Request
+      uses: peter-evans/create-pull-request@v4
+      with:
+        commit-message: "chore: Coverage Report"
+        delete-branch: true
+        title: "Coverage Report - ${{ steps.latest-tag.outputs.latestTag }}"
+        body: ${{ steps.report.outputs.coverage_report }}

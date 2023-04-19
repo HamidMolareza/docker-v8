@@ -7,6 +7,12 @@ from docker_entrypoint._libs.utility import D8_Recommended_OPTIONS
 
 @def_result()
 def create_cli_parser() -> Result[argparse.ArgumentParser]:
+    """
+    This function creates a command-line interface parser with sub-parsers for different commands and their arguments.
+
+    :return: Returning a `Result` object that contains an `argparse.ArgumentParser` object.
+    """
+
     # Define the main parser
     parser = argparse.ArgumentParser(description='The d8 docker entrypoint')
     parser.add_argument('--version', action='store_true', help='show program version')
@@ -34,6 +40,9 @@ def create_cli_parser() -> Result[argparse.ArgumentParser]:
     # Create a sub-parser for the 'samples' command
     samples_parser = argparse.ArgumentParser(add_help=False)
 
+    # Create a sub-parser for the 'about' command
+    about_parser = argparse.ArgumentParser(add_help=False)
+
     # Add sub-parsers for the commands
     subparsers = parser.add_subparsers(dest='command')
 
@@ -45,5 +54,6 @@ def create_cli_parser() -> Result[argparse.ArgumentParser]:
     subparsers.add_parser('d8', parents=[d8_parser], help='Default d8 shell')
     subparsers.add_parser('bash', parents=[bash_parser], help='Execute a bash shell with arguments')
     subparsers.add_parser('samples', parents=[samples_parser], help='Show samples')
+    subparsers.add_parser('about', parents=[about_parser], help='Show About message')
 
     return Result.ok(parser)

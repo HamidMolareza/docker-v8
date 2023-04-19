@@ -36,4 +36,22 @@ repos:
     rev: v2.14.5
     hooks:
       - id: pylint
-        args: [ "--rcfile=pylint.cfg", "--ignore=venv" ,"docker_entrypoint" ]
+        args: [ 'docker_entrypoint/', '--ignore=requirements.py' ]
+        exclude: tests/  # Prevent files in tests/ to be passed in to pylint.
+
+  - repo: https://github.com/Payadel/pre-commit-hooks
+    rev: v0.1.3
+    hooks:
+      - id: run-scripts
+        name: check-tox-before-push
+        args: [ "-f=.hooks/check-tox.sh", "dev" ]
+        stages: [ push ]
+        pass_filenames: false
+        verbose: false
+
+      - id: run-scripts
+        name: update-poetry-dependencies
+        args: [ "-f=.hooks/update-poetry-dependencies.sh"]
+        stages: [ push ]
+        pass_filenames: false
+        verbose: false

@@ -35,9 +35,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: d8:latest
+          tags: hamidmolareza/d8:latest, hamidmolareza/d8:${{ env.DOCKER_VERSION }}
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}
             DOCKER_VERSION=${{ env.DOCKER_VERSION }}
-            
-#     TODO: Add Test

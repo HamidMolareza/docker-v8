@@ -29,7 +29,8 @@ V8 version 9.0.0 (candidate)
 d8>
 ```
 
-* The default V8 shell is wrapped with `rlwrap` (https://github.com/hanslub42/rlwrap) to enhance the experience with the REPL (e.g. use arrow keys to recall previous/next lines).
+* The default V8 shell is wrapped with `rlwrap` (https://github.com/hanslub42/rlwrap) to enhance the experience with the
+  REPL (e.g. use arrow keys to recall previous/next lines).
 
 * The `harmony` options are automatically injected via the `entrypoint.sh` script.
 
@@ -39,7 +40,8 @@ d8>
 $ docker run --rm -it andreburgaud/d8 shell --dump-counters
 ```
 
-Upon exciting the d8 shell, the v8 counters will be dumped to the terminal. The counters are listed alphabetically with their values.
+Upon exciting the d8 shell, the v8 counters will be dumped to the terminal. The counters are listed alphabetically with
+their values.
 
 ### Using Multiline
 
@@ -64,7 +66,9 @@ d8>
 
 ### What is Harmony?
 
-When ECMAScript 4 (ES4) was abandoned in 2008, some of its features were rolled into a project codenamed ECMAScript Harmony. ES6 later renamed ES2015 was the first "ECMAScript Harmony" specification and is also known as "ES6 Harmony". The V8 harmony options enable specific features that may not yet be part of the default engine features.
+When ECMAScript 4 (ES4) was abandoned in 2008, some of its features were rolled into a project codenamed ECMAScript
+Harmony. ES6 later renamed ES2015 was the first "ECMAScript Harmony" specification and is also known as "ES6 Harmony".
+The V8 harmony options enable specific features that may not yet be part of the default engine features.
 
 ### Harmony Flags with Version 9.x
 
@@ -133,7 +137,8 @@ $ cd docker-v8
 $ docker build -t d8 .
 ```
 
-**Note**: the compilation may take some time depending on your hardware. For example it takes about 30 minutes on a 3.5GHz four core iMac with 24GB of RAM.
+**Note**: the compilation may take some time depending on your hardware. For example it takes about 30 minutes on a
+3.5GHz four core iMac with 24GB of RAM.
 
 # Resources
 

@@ -46,7 +46,7 @@ All notable changes to this project will be documented in this file. See [standa
 * improve `log_result` ([0d5c339](https://github.com/HamidMolareza/v8-docker/commit/0d5c3393020647f97b6ac3ec4882fe767b0f3d8f))
 * log unhandled exceptions from `_inner_main` & other bugs ([52450bc](https://github.com/HamidMolareza/v8-docker/commit/52450bc295aaf80a8f75bfb3ef50acad089c8056))
 * make logger name optional ([a1aad31](https://github.com/HamidMolareza/v8-docker/commit/a1aad314ef21272f4f4cecd5e915fb381244b6f6))
-* make mesage optional in FailResult.py ([fa6ca7d](https://github.com/HamidMolareza/v8-docker/commit/fa6ca7d6bace3fbef22d494366d995182596fff8))
+* make message optional in FailResult.py ([fa6ca7d](https://github.com/HamidMolareza/v8-docker/commit/fa6ca7d6bace3fbef22d494366d995182596fff8))
 * use `class_properties_to_str` instead of `log_class_properties` ([e0354de](https://github.com/HamidMolareza/v8-docker/commit/e0354de26ddd2f1a19bbcbc8f879c4f7d206cb5b))
 * use `validate_func_params` for validations ([4d35532](https://github.com/HamidMolareza/v8-docker/commit/4d3553234a648488dabda50b6cccb5a7d6bdaa69))
 * use Schema package for validate `command_about` parameters ([433ca13](https://github.com/HamidMolareza/v8-docker/commit/433ca13d6d86d58d529a9603b0f65472f22324ca))

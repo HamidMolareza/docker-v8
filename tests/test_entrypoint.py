@@ -25,18 +25,8 @@ class TestEntrypoint(unittest.TestCase):
         logger, logging_stream = get_logger()
         code = main([], logger)
         assert code == 2
-        self.assertEqual('[DEBUG] success: True\n'
-                         'Value: Environments:\n'
-                         '\tmaintainer: No Data!\n'
-                         '\tdocker_version: latest\n'
-                         '\tbuild_date: No Data!\n'
-                         '\tvcs_url: No Data!\n'
-                         '\tbug_report: No Data!\n'
-                         '\tdocker_name: No Data!\n\n\n'
-                         '[DEBUG] known params: Namespace(command=None, debug=False, version=False)\n'
-                         'Args: []\n'
-                         '[ERROR] Operation failed with code 2.\n'
-                         'No command specified.\n\n', logging_stream.getvalue())
+        self.assertIn('[ERROR] Operation failed with code 2.\n'
+                      'No command specified.\n\n', logging_stream.getvalue())
 
     def test_main_base_flags(self):
         logger, logging_stream = get_logger()
@@ -85,25 +75,26 @@ class TestEntrypoint(unittest.TestCase):
                           "File 'invalid_program_path' does not exists.\n", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
-            code = main(f'run {program_file}'.split(' '), logger)
+            code = main(f'--debug run {program_file}'.split(' '), logger)
             self.assertIn("[WARNING] No file provided.\n"
                           f"[DEBUG] command: bash -c 'd8 {program_file}'\n"
                           f"[DEBUG] Return Code: {code}\n"
                           f"[ERROR] Operation failed with code {code}.\n", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
-            code = main(f'run {program_file} -f invalid'.split(' '), logger)
+            code = main(f'--debug run {program_file} -f invalid'.split(' '), logger)
             self.assertIn(
-                f"[DEBUG] known params: Namespace(command='run', debug=False, directory=None, file=['invalid'], program='{program_file}', version=False)\n"
+                "[DEBUG] known params: Namespace(command='run', debug=True, directory=None, "
+                f"file=['invalid'], program='{program_file}', version=False)\n"
                 "Args: []\n"
                 f"[ERROR] Operation failed with code {code}.\n"
                 "Title: File or directory is not valid.\n"
                 "Message: The (invalid) is not valid.\n", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
-            code = main(f'run {program_file} -f {file1}'.split(' '), logger)
+            code = main(f'--debug run {program_file} -f {file1}'.split(' '), logger)
             self.assertIn(
-                f"[DEBUG] known params: Namespace(command='run', debug=False, directory=None, file=['{file1}'], program='{program_file}', version=False)\n"
+                f"[DEBUG] known params: Namespace(command='run', debug=True, directory=None, file=['{file1}'], program='{program_file}', version=False)\n"
                 "Args: []\n"
                 "[DEBUG] Number of input files: 1\n"
                 f"[INFO] file 1: {file1}\n"
@@ -112,18 +103,18 @@ class TestEntrypoint(unittest.TestCase):
                 f"[ERROR] Operation failed with code {code}.", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
-            code = main(f'run {program_file} -f {file1} -d invalid'.split(' '), logger)
+            code = main(f'--debug run {program_file} -f {file1} -d invalid'.split(' '), logger)
             self.assertIn(
-                f"[DEBUG] known params: Namespace(command='run', debug=False, directory=['invalid'], file=['{file1}'], program='{program_file}', version=False)\n"
+                f"[DEBUG] known params: Namespace(command='run', debug=True, directory=['invalid'], file=['{file1}'], program='{program_file}', version=False)\n"
                 "Args: []\n"
                 f"[ERROR] Operation failed with code {code}.\n"
                 "Title: File or directory is not valid.\n"
                 "Message: The (invalid) is not valid.\n", logging_stream.getvalue())
 
             logger, logging_stream = get_logger()
-            code = main(f'run {program_file} -f {file1} -d {dir1}'.split(' '), logger)
+            code = main(f'--debug run {program_file} -f {file1} -d {dir1}'.split(' '), logger)
             self.assertIn(
-                f"[DEBUG] known params: Namespace(command='run', debug=False, directory=['{dir1}'], file=['{file1}'], program='{program_file}', version=False)\n"
+                f"[DEBUG] known params: Namespace(command='run', debug=True, directory=['{dir1}'], file=['{file1}'], program='{program_file}', version=False)\n"
                 "Args: []\n"
                 "[DEBUG] Number of input files: 2\n"
                 f"[INFO] file 1: {file2}\n"

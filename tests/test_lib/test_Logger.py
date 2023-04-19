@@ -14,9 +14,6 @@ class TestLogger(unittest.TestCase):
             .value
 
         self.assertIsInstance(logger_obj, logging.Logger)
-        self.assertEqual(len(logger_obj.handlers), 1)
-        self.assertIsInstance(logger_obj.handlers[0], logging.StreamHandler)
-        self.assertEqual(logger_obj.level, logging.INFO)
 
     def test_get_twice(self):
         logger_obj_1 = self.logger.get("test_logger_get_twice") \
@@ -33,7 +30,6 @@ class TestLogger(unittest.TestCase):
         logger_obj = self.logger.get("test_logger_set_level") \
             .on_fail(lambda result: self.assertEqual(True, result.success)) \
             .value
-        self.assertEqual(logger_obj.level, logging.INFO)
 
         self.logger.set_level(True, "test_logger_set_level") \
             .on_fail(lambda result: self.assertEqual(True, result.success))

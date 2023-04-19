@@ -62,13 +62,13 @@ This project aims to make it easier for developers to use the `V8` engine by pro
 <br>
 
 Commands:
-<img src="docs/images/menu.png" title="Menu" width="100%">
+<img src="docs/images/menu.png" title="Menu">
 
 Run a javascript program with multi inputs:
-<img src="docs/images/run-command.png" title="Menu" width="100%">
+<img src="docs/images/run-command.png" title="Menu">
 
 The d8 shell:
-<img src="docs/images/d8.png" title="Menu" width="100%">
+<img src="docs/images/d8.png" title="Menu">
 
 </details>
 

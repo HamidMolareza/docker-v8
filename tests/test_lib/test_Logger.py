@@ -8,34 +8,48 @@ class TestLogger(unittest.TestCase):
     def setUp(self):
         self.logger = Logger()
 
-    def test_logger_get(self):
-        logger_obj = self.logger.get("test_logger_get")
+    def test_get(self):
+        logger_obj = self.logger.get("test_logger_get") \
+            .on_fail(lambda result: self.assertEqual(True, result.success)) \
+            .value
 
         self.assertIsInstance(logger_obj, logging.Logger)
         self.assertEqual(len(logger_obj.handlers), 1)
         self.assertIsInstance(logger_obj.handlers[0], logging.StreamHandler)
         self.assertEqual(logger_obj.level, logging.INFO)
 
-    def test_logger_get_twice(self):
-        logger_obj_1 = self.logger.get("test_logger_get_twice")
-        logger_obj_2 = self.logger.get("test_logger_get_twice")
+    def test_get_twice(self):
+        logger_obj_1 = self.logger.get("test_logger_get_twice") \
+            .on_fail(lambda result: self.assertEqual(True, result.success)) \
+            .value
+
+        logger_obj_2 = self.logger.get("test_logger_get_twice") \
+            .on_fail(lambda result: self.assertEqual(True, result.success)) \
+            .value
+
         self.assertIs(logger_obj_1, logger_obj_2)
 
-    def test_logger_set_level(self):
-        logger_obj = self.logger.get("test_logger_set_level")
+    def test_set_level(self):
+        logger_obj = self.logger.get("test_logger_set_level") \
+            .on_fail(lambda result: self.assertEqual(True, result.success)) \
+            .value
         self.assertEqual(logger_obj.level, logging.INFO)
 
-        self.logger.set_level(True, "test_logger_set_level")
+        self.logger.set_level(True, "test_logger_set_level") \
+            .on_fail(lambda result: self.assertEqual(True, result.success))
         self.assertEqual(logger_obj.level, logging.DEBUG)
 
-        self.logger.set_level(False, "test_logger_set_level")
+        self.logger.set_level(False, "test_logger_set_level") \
+            .on_fail(lambda result: self.assertEqual(True, result.success))
         self.assertEqual(logger_obj.level, logging.INFO)
 
         # Test without name parameter
-        self.logger.set_level(True)
+        self.logger.set_level(True) \
+            .on_fail(lambda result: self.assertEqual(True, result.success))
         self.assertEqual(logger_obj.level, logging.DEBUG)
 
-        self.logger.set_level(False)
+        self.logger.set_level(False) \
+            .on_fail(lambda result: self.assertEqual(True, result.success))
         self.assertEqual(logger_obj.level, logging.INFO)
 
 

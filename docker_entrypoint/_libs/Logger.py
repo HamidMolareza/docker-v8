@@ -1,6 +1,10 @@
 import logging
 from typing import Optional
 
+from on_rails import Result, def_result
+from pylity.decorators.validate_func_params import validate_func_params
+from schema import And, Or, Schema
+
 
 class Logger:
     """
@@ -11,7 +15,12 @@ class Logger:
     _logger: Optional[logging.Logger] = None
 
     @staticmethod
-    def get(name: Optional[str] = None):
+    @def_result()
+    @validate_func_params(schema=Schema({
+        'name': Or(None, And(str, str.strip, lambda s: len(s) > 0),
+                   error='The name must be None or a (non empty) string.')
+    }))
+    def get(name: Optional[str] = None) -> Result[logging.Logger]:
         """
         Returns a logger object with a specified name and adds a console handler to it if it doesn't already
         exist.
@@ -30,10 +39,16 @@ class Logger:
             console_handler.setFormatter(formatter)
             Logger._logger.addHandler(console_handler)
             Logger._logger.setLevel(logging.INFO)
-        return Logger._logger
+        return Result.ok(Logger._logger)
 
     @staticmethod
-    def set_level(debug: Optional[bool], name: Optional[str] = None):
+    @def_result()
+    @validate_func_params(schema=Schema({
+        'debug': Or(None, bool, error='The debug must be None or boolean.'),
+        'name': Or(None, And(str, str.strip, lambda s: len(s) > 0),
+                   error='The name must be None or a (non empty) string.')
+    }))
+    def set_level(debug: Optional[bool], name: Optional[str] = None) -> Result:
         """
         This function sets the logging level of a logger to either DEBUG or INFO based on
         the value of the debug parameter.
@@ -47,4 +62,5 @@ class Logger:
         :type name: Optional[str]
         """
 
-        Logger.get(name).setLevel(logging.DEBUG if debug else logging.INFO)
+        return Logger.get(name) \
+            .on_success(lambda logger: logger.setLevel(logging.DEBUG if debug else logging.INFO))

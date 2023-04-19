@@ -2,19 +2,18 @@ import logging
 from typing import List, Optional
 
 from on_rails import Result, def_result
-from schema import Optional as Opt
-from schema import Or, Schema
+from pylity.decorators.validate_func_params import validate_func_params
+from schema import And, Or, Schema
 
 from docker_entrypoint._libs.cli_parser import create_cli_parser
 from docker_entrypoint._libs.commands import (command_about, command_bash,
                                               command_d8, command_run,
                                               command_samples, command_shell)
-from docker_entrypoint._libs.docker_environments import DockerEnvironments
+from docker_entrypoint._libs.DockerEnvironments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.Logger import Logger
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
-from docker_entrypoint._libs.utility import (class_properties_to_str,
-                                             log_result, try_validation)
+from docker_entrypoint._libs.utility import class_properties_to_str, log_result
 
 
 def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = None) -> int:
@@ -30,18 +29,15 @@ def main(args: Optional[List[str]] = None, logger: Optional[logging.Logger] = No
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'logger': Or(None, logging.Logger, error='The logger must be None or type of logging.Logger'),
+    'args': Or(None, [str], error='The args must be None or be a list of strings'),
+}))
 def _inner_main(logger: Optional[logging.Logger] = None, args: Optional[List[str]] = None) -> Result:
-    schema = Schema({
-        Opt('args'): Or(None, [str]),
-        Opt('logger'): Or(None, logging.Logger),
-    })
-    validation = try_validation(lambda: schema.validate({'args': args, 'logger': logger})) \
-        .on_fail_tee(lambda result: print(result.detail))
-    if not validation.success:
-        return validation
-
     if not logger:
-        logger = Logger.get(__name__)
+        logger = Logger.get(__name__) \
+            .on_fail_break_function() \
+            .value
 
     return create_cli_parser() \
         .on_success(lambda parser: (parser.parse_known_args(args), parser)) \
@@ -55,6 +51,11 @@ def _inner_main(logger: Optional[logging.Logger] = None, args: Optional[List[str
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'arguments': And(lambda param: param is not None, error='The arguments is required'),
+    'parser': And(lambda param: param is not None, error='The parser is required'),
+    'logger': And(logging.Logger, error='The logger is required and must be type of logging.Logger'),
+}))
 def run(arguments, parser, logger: logging.Logger) -> Result:
     """
     This function runs a command with given arguments and logs information about Docker environments and known parameters.
@@ -75,9 +76,8 @@ def run(arguments, parser, logger: logging.Logger) -> Result:
 
     known_params, args = arguments
 
-    Logger.set_level(debug=known_params.debug)
-
-    return DockerEnvironments.get_environments() \
+    return Logger.set_level(debug=known_params.debug) \
+        .on_success(lambda: DockerEnvironments.get_environments()) \
         .on_success_tee(lambda environments:
                         (logger.debug(class_properties_to_str(environments, "Environments")),
                          logger.debug(f"known params: {known_params}\nArgs: {args}"))

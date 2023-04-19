@@ -1,5 +1,7 @@
 import unittest
 
+from on_rails import try_func
+
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 

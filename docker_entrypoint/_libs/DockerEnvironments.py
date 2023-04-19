@@ -1,6 +1,8 @@
 import os
 
 from on_rails import Result, def_result
+from pylity.decorators.validate_func_params import validate_func_params
+from schema import And, Schema
 
 
 class DockerEnvironments:
@@ -16,6 +18,14 @@ class DockerEnvironments:
     bug_report: str
     docker_name: str
 
+    @validate_func_params(schema=Schema({
+        'maintainer': And(str, len, error='The maintainer is required string and can not be empty.'),
+        'docker_version': And(str, len, error='The docker_version is required string and can not be empty.'),
+        'build_date': And(str, len, error='The build_date is required string and can not be empty.'),
+        'vcs_url': And(str, len, error='The vcs_url is required string and can not be empty.'),
+        'bug_report': And(str, len, error='The bug_report is required string and can not be empty.'),
+        'docker_name': And(str, len, error='The docker_name is required string and can not be empty.'),
+    }), raise_exception=True)
     def __init__(self, maintainer: str, docker_version: str, build_date: str, vcs_url: str, bug_report: str,
                  docker_name: str):
         self.maintainer = maintainer

@@ -22,14 +22,14 @@ class TestUtility(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The logger is required.", expected_code=400)
+                            expected_message="The logger is required and must be type of logging.", expected_code=400)
 
     def test_log_result_give_none_result(self):
         result = log_result(logging.getLogger(), None)
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-        assert_error_detail(self, result.detail, expected_title="The result parameter is not valid.",
-                            expected_message="The result parameter is required and must be an instance of Result.",
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The result is required and must be type of Result.",
                             expected_code=400)
 
     def test_log_result_give_success(self):
@@ -58,8 +58,10 @@ class TestUtility(unittest.TestCase):
 
         result = log_result(logger, Result.fail(ValidationError()))
         assert_result(self, target_result=result, expected_success=True)
+
+        log_output = logging_stream.getvalue()
         self.assertIn("Title: One or more validation errors occurred\nCode: 400\nStack trace:",
-                      logging_stream.getvalue())
+                      log_output)
         self.assertIn("[INFO] Please report this error to help others who use this program.\n"
                       "Support:\n"
                       "\tMaintainer: No Data!\n"
@@ -67,7 +69,7 @@ class TestUtility(unittest.TestCase):
                       "\tBuild Date: No Data!\n"
                       "\tRepository: No Data!\n"
                       "\tReport Bug: No Data!",
-                      logging_stream.getvalue())
+                      log_output)
 
     def test_log_result_unexpected_error_without_detail(self):
         logger, logging_stream = get_logger()
@@ -85,14 +87,14 @@ class TestUtility(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The logger is required.", expected_code=400)
+                            expected_message="The logger is required and must be type of logging.", expected_code=400)
 
     def test_log_error_give_none_result(self):
         result = log_error(logging.getLogger(), None)
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-        assert_error_detail(self, result.detail, expected_title="The result parameter is not valid.",
-                            expected_message="The result parameter is required and must be an instance of Result.",
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The fail_result is required and must be type of Result.fail()",
                             expected_code=400)
 
     def test_log_error_give_success_result(self):
@@ -101,8 +103,8 @@ class TestUtility(unittest.TestCase):
 
         assert_result_with_type(self, func_result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, func_result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="Expected failure result but got success result!",
-                            expected_code=400, expected_more_data=[result])
+                            expected_message="The fail_result is required and must be type of Result.fail()",
+                            expected_code=400)
 
     def test_log_error(self):
         logger, logging_stream = get_logger()
@@ -148,15 +150,20 @@ class TestUtility(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The class object is required.",
+                            expected_message="The class object is required and must be an instance of a class",
                             expected_code=400)
 
-    def test_class_properties_to_str_give_invalid_message(self):
+    def test_class_properties_to_str_give_invalid_title(self):
         result = class_properties_to_str(self, ['not string'])
-
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The message must be a string.",
+                            expected_message="The title must be None or non-empty string",
+                            expected_code=400)
+
+        result = class_properties_to_str(self, title="   ")
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The title must be None or non-empty string",
                             expected_code=400)
 
     def test_class_properties_to_str_without_msg(self):
@@ -166,9 +173,6 @@ class TestUtility(unittest.TestCase):
                 self.prop2 = "prop2"
 
         result = class_properties_to_str(Fake())
-        assert_result(self, result, expected_success=True, expected_value="prop1: prop1\nprop2: prop2\n")
-
-        result = class_properties_to_str(Fake(), title="   ")
         assert_result(self, result, expected_success=True, expected_value="prop1: prop1\nprop2: prop2\n")
 
     def test_class_properties_to_str_with_msg(self):
@@ -189,8 +193,8 @@ class TestUtility(unittest.TestCase):
     def test_convert_code_to_result_invalid_code(self):
         result = convert_code_to_result(None)
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
-        assert_error_detail(self, result.detail, expected_title="The code parameter is not valid.",
-                            expected_message="The code parameter is required and must be an integer.",
+        assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
+                            expected_message="The code is required and must be integer",
                             expected_code=400)
 
     def test_convert_code_to_result(self):
@@ -209,7 +213,7 @@ class TestUtility(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="The input function is not valid.", expected_code=400)
+                            expected_message="The validation_func is required and must be a function", expected_code=400)
 
     def test_try_validation_raise_validation_error(self):
         def validation_failed():

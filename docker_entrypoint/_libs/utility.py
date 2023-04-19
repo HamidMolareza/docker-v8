@@ -3,9 +3,10 @@ from typing import Callable, Optional
 
 from on_rails import Result, ValidationError, def_result, try_func
 from pylity import String
-from schema import SchemaError
+from pylity.decorators.validate_func_params import validate_func_params
+from schema import And, Or, Schema, SchemaError
 
-from docker_entrypoint._libs.docker_environments import DockerEnvironments
+from docker_entrypoint._libs.DockerEnvironments import DockerEnvironments
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 
 D8_Recommended_OPTIONS = {
@@ -24,6 +25,10 @@ D8_Recommended_OPTIONS = {
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'logger': And(logging.Logger, error='The logger is required and must be type of logging.'),
+    'result': And(Result, error='The result is required and must be type of Result.'),
+}))
 def log_result(logger: logging.Logger, result: Result) -> Result:
     """
     Logs unexpected errors. Results that isn't success and isn't type of FailResult
@@ -35,13 +40,6 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
     :param result: The `result` parameter is an instance of the `Result` class
     :type result: Result
     """
-
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-    if not result or not isinstance(result, Result):
-        return Result.fail(ValidationError(title="The result parameter is not valid.",
-                                           message="The result parameter is required and must be "
-                                                   "an instance of Result."))
 
     if result.success:
         if result.value is not None:
@@ -59,6 +57,11 @@ def log_result(logger: logging.Logger, result: Result) -> Result:
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'logger': And(logging.Logger, error='The logger is required and must be type of logging.'),
+    'fail_result': And(Result, lambda result: not result.success,
+                       error='The fail_result is required and must be type of Result.fail()'),
+}))
 def log_error(logger: logging.Logger, fail_result: Result) -> Result:
     """
     This function logs an error message and returns a support message if a failure result is encountered.
@@ -70,16 +73,6 @@ def log_error(logger: logging.Logger, fail_result: Result) -> Result:
     It contains information about the failure, such as an error message or exception
     :type fail_result: Result
     """
-
-    if not logger:
-        return Result.fail(ValidationError(message="The logger is required."))
-    if not fail_result or not isinstance(fail_result, Result):
-        return Result.fail(ValidationError(title="The result parameter is not valid.",
-                                           message="The result parameter is required and must be "
-                                                   "an instance of Result."))
-    if fail_result.success:
-        return Result.fail(detail=ValidationError(message="Expected failure result but got success result!",
-                                                  more_data=[fail_result]))
 
     logger.error(f"An error occurred:\n{repr(fail_result.detail)}\n")
     return get_support_message() \
@@ -101,6 +94,10 @@ def get_support_message() -> Result[str]:
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'environments': And(DockerEnvironments,
+                        error='environments is required and must be an instance of `DockerEnvironments`')
+}))
 def _get_support_message(environments: DockerEnvironments) -> Result[str]:
     return Result.ok(value="Support:\n"
                            f"\tMaintainer: {environments.maintainer}\n"
@@ -112,7 +109,12 @@ def _get_support_message(environments: DockerEnvironments) -> Result[str]:
 
 
 @def_result()
-def class_properties_to_str(class_object: object, title: Optional[str] = None) -> Result[str]:
+@validate_func_params(schema=Schema({
+    'class_object': And(object, lambda param: param is not None,
+                        error='The class object is required and must be an instance of a class'),
+    'title': Or(None, And(str, lambda s: len(s.strip()) > 0, error='The title must be None or non-empty string'))
+}))
+def class_properties_to_str(class_object, title: Optional[str] = None) -> Result[str]:
     """
     The function converts the properties of a class object to a string format with an optional title.
 
@@ -129,11 +131,6 @@ def class_properties_to_str(class_object: object, title: Optional[str] = None) -
     is an error, a Result object with a ValidationError message is returned.
     """
 
-    if not class_object:
-        return Result.fail(ValidationError(message="The class object is required."))
-    if title and not isinstance(title, str):
-        return Result.fail(ValidationError(message="The message must be a string."))
-
     has_message = not String.is_none_or_empty(title)
     result = f"{title}:\n" if has_message else ""
     tab = '\t' if has_message else ''
@@ -143,6 +140,9 @@ def class_properties_to_str(class_object: object, title: Optional[str] = None) -
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'code': And(int, error='The code is required and must be integer')
+}))
 def convert_code_to_result(code: int) -> Result:
     """
     The function converts a code to a Result object, returning an OK result if the code is 0 and a FailResult object
@@ -152,16 +152,15 @@ def convert_code_to_result(code: int) -> Result:
     :type code: int
     """
 
-    if code is None or not isinstance(code, int):
-        return Result.fail(ValidationError(title="The code parameter is not valid.",
-                                           message="The code parameter is required and must be an integer."))
-
     if code == 0:
         return Result.ok()
     return Result.fail(FailResult(code=code))
 
 
 @def_result()
+@validate_func_params(schema=Schema({
+    'validation_func': And(lambda x: callable(x), error='The validation_func is required and must be a function')
+}))
 def try_validation(validation_func: Callable) -> Result:
     """
     It executes the validation_func function. If an SchemaError is raised, it returns the error result

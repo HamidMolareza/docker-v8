@@ -9,7 +9,7 @@ from on_rails import (ValidationError, assert_error_detail, assert_result,
 from docker_entrypoint._libs.commands import (command_about, command_bash,
                                               command_d8, command_run,
                                               command_samples, command_shell)
-from docker_entrypoint._libs.docker_environments import DockerEnvironments
+from docker_entrypoint._libs.DockerEnvironments import DockerEnvironments
 from docker_entrypoint._libs.ExitCodes import ExitCode
 from docker_entrypoint._libs.ResultDetails.FailResult import FailResult
 from tests._helpers import assert_fail_result_detail, get_logger
@@ -24,11 +24,35 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object",
+                            expected_code=400)
 
     def test_command_run_give_invalid_program(self):
-        result = command_run(logging.getLogger(), "invalid")
+        result = command_run(logging.getLogger(), None)
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_code=400,
+                            expected_title='One or more validation errors occurred',
+                            expected_message="The program must be a string")
 
+        result = command_run(logging.getLogger(), 5)
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_code=400,
+                            expected_title='One or more validation errors occurred',
+                            expected_message="The program must be a string")
+
+        result = command_run(logging.getLogger(), '')
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_code=400,
+                            expected_title='One or more validation errors occurred',
+                            expected_message="The program can not be empty or whitespace")
+
+        result = command_run(logging.getLogger(), '    ')
+        assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
+        assert_error_detail(self, result.detail, expected_code=400,
+                            expected_title='One or more validation errors occurred',
+                            expected_message="The program can not be empty or whitespace")
+
+        result = command_run(logging.getLogger(), "invalid")
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=FailResult)
         assert_fail_result_detail(self, result.detail, expected_code=ExitCode.IO_ERROR,
                                   expected_message="File 'invalid' does not exists.")
@@ -126,7 +150,8 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object",
+                            expected_code=400)
 
     def test_command_d8_give_invalid_list(self):
         result = command_d8(logging.getLogger(), "not list")
@@ -153,7 +178,8 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object",
+                            expected_code=400)
 
     def test_command_shell_give_invalid_list(self):
         result = command_shell(logging.getLogger(), "not list")
@@ -181,7 +207,8 @@ class TestCommands(unittest.TestCase):
 
         assert_result_with_type(self, result, expected_success=False, expected_detail_type=ValidationError)
         assert_error_detail(self, result.detail, expected_title="One or more validation errors occurred",
-                            expected_message="logger is required and must be a logging.Logger object", expected_code=400)
+                            expected_message="logger is required and must be a logging.Logger object",
+                            expected_code=400)
 
     def test_command_bash_give_invalid_list(self):
         result = command_bash(logging.getLogger(), "not list")

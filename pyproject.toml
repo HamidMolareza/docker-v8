@@ -1,7 +1,7 @@
 # https://python-poetry.org/docs/pyproject/
 [tool.poetry]
 name = "entrypoint"
-version = "1.0.1"
+version = "1.0.2"
 description = "The d8 docker entrypoint"
 authors = ["Hamid Molareza <HamidMolareza@gmail.com>"]
 license = "GPLV3"

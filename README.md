@@ -269,8 +269,9 @@ Please see the [CHANGELOG.md](CHANGELOG.md) file.
 This project provides the following features:
 
 - A pre-configured Docker image for the V8 engine.
-- Provides an isolated environment to run V8 applications and scripts
+- Small size
 - Easy to use and configure
+- Provides an isolated environment to run V8 applications and scripts
 
 ## Roadmap
 

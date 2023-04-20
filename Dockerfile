@@ -83,7 +83,8 @@ RUN chmod +x /entrypoint/entrypoint.sh \
     && ln -s /v8/d8 /usr/local/bin/d8
 
 # Tests
-RUN d8 run /samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs \
-    && entrypoint --version
+RUN d8 /samples/hello-world.js
+RUN entrypoint --version
+RUN entrypoint run /samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs
 
 ENTRYPOINT ["/entrypoint/entrypoint.sh"]

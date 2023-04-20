@@ -12,6 +12,19 @@ SKIP_CHANGELOG := $(if $(skip_changelog),$(skip_changelog),true)
 CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
 PUSH := $(if $(push),$(push),true)
 
+# Targets for running workflow commands
+watch-actions: ## Watch a run until it completes, showing its progress
+	gh run watch; notify-send "run is done!"
+
+changelog-action: ## Run changelog action
+	gh workflow run Changelog --ref $(REF) -f version=$(VERSION)
+
+release-action: ## Run release action
+	gh workflow run Release --ref $(REF) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
+
+build-push-docker: ## Build and Push the Docker image
+	gh workflow run 'Push Docker Image' --ref $(REF) -f push=$(PUSH)
+
 build:  ## Build the Docker image
 	docker build \
 		--build-arg DOCKER_BUILD_DATE=$(BUILD_DATE) \
@@ -29,19 +42,6 @@ deploy: clean build push  ## Deploy means: clean build push
 
 update-poetry-dependencies:  ## Update poetry dependencies
 	xargs poetry add < requirements.txt
-
-# Targets for running workflow commands
-watch-actions: ## Watch a run until it completes, showing its progress
-	gh run watch; notify-send "run is done!"
-
-changelog-action: ## Run changelog action
-	gh workflow run Changelog --ref $(REF) -f version=$(VERSION)
-
-release-action: ## Run release action
-	gh workflow run Release --ref $(REF) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
-
-build-push-docker: ## Build and Push the Docker image
-	gh workflow run 'Push Docker Image' --ref $(REF) -f push=$(PUSH)
 
 # Targets for running standard-version commands
 version: ## Get current program version

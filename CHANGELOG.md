@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/HamidMolareza/v8-docker/compare/v0.2.0...v0.2.1) (2023-04-20)
+
+
+### Tests
+
+* update `samples` command tests ([fbd0249](https://github.com/HamidMolareza/v8-docker/commit/fbd0249a5617547534b4b8c580a546bdb8abe1ee))
+
+
+### Documents
+
+* add `Change Entrypoint` section to README.md ([923916a](https://github.com/HamidMolareza/v8-docker/commit/923916ab0d92165848c74b4c2da31a1e04dc34a0))
+* update CONTRIBUTING.md ([7e5d1d4](https://github.com/HamidMolareza/v8-docker/commit/7e5d1d497803053bbff716b53f5b968e86b975a0))
+* update README.md ([f52c8a6](https://github.com/HamidMolareza/v8-docker/commit/f52c8a673cc5007b199589b6d7555462b53b5db6))
+
+
+### Fixes
+
+* improve Dockerfile to reduce image size ([2a6c42e](https://github.com/HamidMolareza/v8-docker/commit/2a6c42ee4d99a924a9e3190c1d7251800d5bf47a))
+* update `samples` command texts ([b774c3f](https://github.com/HamidMolareza/v8-docker/commit/b774c3fa64cf69774acedf8b6adaf1f455e7ab5a))
+
 ## [0.2.0](https://github.com/HamidMolareza/v8-docker/compare/v0.1.1...v0.2.0) (2023-04-19)
 
 

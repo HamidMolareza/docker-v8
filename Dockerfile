@@ -2,30 +2,31 @@
 # First stage build (compile V8)
 # ==============================================================================
 
+
 FROM debian:stable-slim as builder
 
 # Install dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -yqq curl git python3
+    DEBIAN_FRONTEND=noninteractive apt-get install -yqq curl git python3 pkg-config binutils
 
 # Install depot_tools
-RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git \
-    && export PATH="/depot_tools:${PATH}" \
-    && fetch v8
+RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+ENV PATH="/depot_tools:${PATH}"
+RUN fetch v8
 
 WORKDIR /v8
-RUN gn gen out/x64.release --args='v8_monolithic=true v8_use_external_startup_data=false is_component_build=false is_debug=false target_cpu="x64" use_goma=false goma_dir="None" v8_enable_backtrace=true v8_enable_disassembler=true v8_enable_object_print=true v8_enable_verify_heap=true' \
-    && ninja -C out/x64.release d8 \
-    && strip out/x64.release/d8
+RUN gn gen out/x64.release --args='v8_monolithic=true v8_use_external_startup_data=false is_component_build=false is_debug=false target_cpu="x64" use_goma=false goma_dir="None" v8_enable_backtrace=true v8_enable_disassembler=true v8_enable_object_print=true v8_enable_verify_heap=true'
+RUN ninja -C out/x64.release d8
+RUN strip out/x64.release/d8
 
 # Build entrypoint package
 WORKDIR /build-entrypoint
 COPY . .
-RUN apt-get install -yqq python3-pip \
-    && pip install poetry \
-    && poetry build \
-    && cp -r dist /tmp/build-entrypoint \
-    && cp install-package.sh /tmp/build-entrypoint/install-package.sh
+RUN apt-get install -yqq python3-pip &&\
+    pip install poetry &&\
+    poetry build &&\
+    cp -r dist /tmp/build-entrypoint &&\
+    cp install-package.sh /tmp/build-entrypoint/install-package.sh
 
 # ==============================================================================
 # Second stage build

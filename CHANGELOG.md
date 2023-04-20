@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/HamidMolareza/v8-docker/compare/v1.0.1...v1.0.2) (2023-04-20)
+
+
+### Fixes
+
+* fix Dockerfile bug ([5f2307e](https://github.com/HamidMolareza/v8-docker/commit/5f2307e9bbd24d00806b2487de87f3366a86cb0a))
+
+
+### Tests
+
+* update Dockerfile tests ([6372dd6](https://github.com/HamidMolareza/v8-docker/commit/6372dd65fb3d5b4caeb7192aefcfebc8945d284f))
+
 ### [1.0.1](https://github.com/HamidMolareza/v8-docker/compare/v1.0.0...v1.0.1) (2023-04-20)
 
 ### Fixes

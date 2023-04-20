@@ -83,4 +83,8 @@ COPY docker_entrypoint/entrypoint.sh /entrypoint/entrypoint.sh
 RUN chmod +x /entrypoint/entrypoint.sh && \
     ln -s /v8/d8 /usr/local/bin/d8
 
+# Tests
+RUN d8 run /samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs  # Test d8
+RUN entrypoint --version  # Test entrypoint
+
 ENTRYPOINT ["/entrypoint/entrypoint.sh"]

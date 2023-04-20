@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/HamidMolareza/v8-docker/compare/v1.0.0...v1.0.1) (2023-04-20)
+
+### Fixes
+
+* optimise Dockerfile ([58084d0](https://github.com/HamidMolareza/v8-docker/commit/58084d09b0efc50d6cf4a5290be0f2b6c44d911c))
+* use `debian:stable-slim` instead of `alpine` ([841ae30](https://github.com/HamidMolareza/v8-docker/commit/841ae3040df9489ab7bd83a227c409a695a1c54b))
+
+### Documents
+
+* update `Features` section in README.md ([3315bfa](https://github.com/HamidMolareza/v8-docker/commit/3315bfafbbc2d2e7b8dc2460151f6479121c3402))
+
+### Tests
+
+* add test to Dockerfile ([586996e](https://github.com/HamidMolareza/v8-docker/commit/586996e40f3d805e28dc6bcf0ccacf2795ec3c21))
+
+
 ## [1.0.0](https://github.com/HamidMolareza/v8-docker/compare/v0.2.0...v1.0.0) (2023-04-20)
 
 ### Fixes

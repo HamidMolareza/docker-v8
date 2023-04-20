@@ -10,6 +10,7 @@ REF := $(if $(ref),$(ref),"dev")
 VERSION := $(if $(version),$(version),"")
 SKIP_CHANGELOG := $(if $(skip_changelog),$(skip_changelog),true)
 CREATE_PR_FOR_BRANCH := $(if $(create_pr_for_branch),$(create_pr_for_branch),"")
+PUSH := $(if $(push),$(push),true)
 
 build:  ## Build the Docker image
 	docker build \
@@ -40,7 +41,7 @@ release-action: ## Run release action
 	gh workflow run Release --ref $(REF) -f skip_changelog=$(SKIP_CHANGELOG) -f version=$(VERSION) -f create_pr_for_branch=$(CREATE_PR_FOR_BRANCH)
 
 build-push-docker: ## Build and Push the Docker image
-	gh workflow run 'Push Docker Image' --ref dev
+	gh workflow run 'Push Docker Image' --ref $(REF) -f push=$(PUSH)
 
 # Targets for running standard-version commands
 version: ## Get current program version

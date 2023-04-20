@@ -95,9 +95,7 @@ Once you have pulled the image, you can run it using the following command:
 docker run --rm -it hamidmolareza/d8 --help
 ```
 
-### Samples:
-
-#### Run Command
+### Run Command
 
 Run a javascript program with parameters:
 
@@ -137,7 +135,7 @@ docker run --rm -it hamidmolareza/d8 run /samples/say-hello.js -f /samples/sampl
 
 > Don't worry about repetition in addressing. The program ignores duplicate files (considers only once)
 
-#### V8 Enhanced Shell
+### V8 Enhanced Shell
 
 Run **enhanced** `d8` shell with the given parameters:
 
@@ -157,7 +155,7 @@ The `-m` option for `rlwrap` enables mouse support, which allows users to use th
 
 The `-pgreen` option for rlwrap enables colorization of output, making it easier to read and distinguish between different types of output.
 
-#### Default V8 Shell
+### Default V8 Shell
 
 Run default `d8` shell with the given parameters:
 
@@ -165,7 +163,7 @@ Run default `d8` shell with the given parameters:
 docker run --rm -it hamidmolareza/d8 d8
 ```
 
-#### Bash
+### Bash
 
 Run `bash` shell with the given parameters:
 
@@ -173,12 +171,93 @@ Run `bash` shell with the given parameters:
 docker run --rm -it hamidmolareza/d8 bash
 ```
 
-#### More Commands
+### More Commands
 
 Use `--help` to see more commands.
 
 ```bash
 docker run --rm -it hamidmolareza/d8 --help
+```
+
+### Change Entrypoint
+
+The `entrypoint` is the starting point of Docker image.
+When `docker run --rm -it hamidmolareza/d8` is called, all parameters are passed to a shell script called `entrypoint.sh`. By changing this file (temporarily or permanently) you can customize the behavior of the image.
+
+#### Temporary Change:
+
+1- Create a file called `entrypoint.sh` and write your commands. For example:
+
+```shell
+#!/bin/bash
+
+echo 'Hello from custom entrypoint!'
+echo 'This call d8...'
+
+d8
+
+```
+
+2- Give this file the necessary access level to run:
+
+```shell
+chmod +x entrypoint.sh
+```
+
+3- Use this command:
+
+```shell
+docker run --rm -it -v $PWD:/entrypoint hamidmolareza/d8
+```
+
+#### Permanent Change:
+
+1- Create a file called `entrypoint.sh` and write your commands. For example:
+
+```shell
+#!/bin/bash
+
+echo 'Hello from custom entrypoint!'
+echo 'This call d8...'
+
+d8
+
+```
+
+2- Give this file the necessary access level to run:
+
+```shell
+chmod +x entrypoint.sh
+```
+
+3- Transfer the created file to Docker with the help of the following command:
+
+```shell
+docker run --rm -it -v $PWD:/src hamidmolareza/d8 bash
+```
+
+4- In docker, copy the new file over the previous file:
+
+```shell
+cp /src/entrypoint.sh /entrypoint/entrypoint.sh
+```
+
+5- Open new terminal (outside of docker image) and get v8 container id with this command:
+
+```shell
+docker ps
+```
+
+6- Commit the image with a new name:
+
+```shell
+docker commit DOCKER_ID my-new-v8-name
+```
+
+7- Use your new docker image:
+
+```shell
+docker run --rm -it my-new-v8-name
 ```
 
 ## CHANGELOG

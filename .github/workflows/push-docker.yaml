@@ -1,6 +1,11 @@
 name: Push Docker Image
 on:
   workflow_dispatch:
+    inputs:
+      push:
+        type: boolean
+        default: true
+        description: push to hub.docker.com or not?
 
 jobs:
   build-push:
@@ -18,6 +23,7 @@ jobs:
         run: |
           echo "Build Date: ${{ env.BUILD_DATE }}"
           echo "Version: ${{ env.DOCKER_VERSION }}"
+          echo "push: ${{ inputs.push }}"
           echo "Current branch name: $(git rev-parse --abbrev-ref HEAD)"
 
       - name: Set up QEMU
@@ -34,7 +40,7 @@ jobs:
       - name: Build Docker
         uses: docker/build-push-action@v4
         with:
-          push: true
+          push: ${{ inputs.push }}
           tags: hamidmolareza/d8:latest, hamidmolareza/d8:${{ env.DOCKER_VERSION }}
           build-args: |
             DOCKER_BUILD_DATE=${{ env.BUILD_DATE }}

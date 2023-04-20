@@ -193,16 +193,15 @@ def command_samples(logger: logging.Logger, environments: DockerEnvironments) ->
     result += f"\tdocker run --rm -it {environments.docker_name} run " \
               f"/samples/say-hello.js -f /samples/sample-inputs/0.txt -d /samples/sample-inputs :\t" \
               f"Execute sample javascript with sample inputs\n"
-    result += f"\tdocker run --rm -it -v $PWD:/solution {environments.docker_name} run " \
-              f"/solution/program.js -d /solution/sample-inputs :\t" \
+    result += f"\tdocker run --rm -it -v $PWD:/src {environments.docker_name} run " \
+              f"/src/program.js -d /src/sample-inputs :\t" \
               f"Execute your local javascript program with your local inputs\n"
     result += f"\tdocker run --rm -it {environments.docker_name} shell :\t" \
-              "starts enhanced d8 shell with the given arguments\n"
+              "starts enhanced d8 shell with the given parameters.\n"
     result += f"\tdocker run --rm -it {environments.docker_name} d8 :\t" \
-              f"starts default d8 shell with the given arguments\n"
+              f"starts default d8 shell with the given parameters.\n"
     result += f"\tdocker run --rm -it {environments.docker_name} bash :\t" \
-              "starts a bash shell with the given arguments\n"
-    result += f"\tdocker run --rm -it {environments.docker_name} :\tstarts a bash shell with the given arguments\n"
+              "starts a bash shell with the given parameters.\n"
     result += f"\tdocker run --rm -it {environments.docker_name} --version :\tdisplays the program version\n"
 
     logger.info(result)

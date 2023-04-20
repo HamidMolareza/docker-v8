@@ -256,12 +256,11 @@ class TestCommands(unittest.TestCase):
                        "Samples:\n" \
                        "\tdocker run --rm -it No Data! run /samples/say-hello.js -f /samples/sample-inputs/0.txt -d " \
                        "/samples/sample-inputs :\tExecute sample javascript with sample inputs\n" \
-                       "\tdocker run --rm -it -v $PWD:/solution No Data! run /solution/program.js -d " \
-                       "/solution/sample-inputs :\tExecute your local javascript program with your local inputs\n" \
-                       "\tdocker run --rm -it No Data! shell :\tstarts enhanced d8 shell with the given arguments\n" \
-                       "\tdocker run --rm -it No Data! d8 :\tstarts default d8 shell with the given arguments\n" \
-                       "\tdocker run --rm -it No Data! bash :\tstarts a bash shell with the given arguments\n" \
-                       "\tdocker run --rm -it No Data! :\tstarts a bash shell with the given arguments\n" \
+                       "\tdocker run --rm -it -v $PWD:/src No Data! run /src/program.js -d " \
+                       "/src/sample-inputs :\tExecute your local javascript program with your local inputs\n" \
+                       "\tdocker run --rm -it No Data! shell :\tstarts enhanced d8 shell with the given parameters.\n" \
+                       "\tdocker run --rm -it No Data! d8 :\tstarts default d8 shell with the given parameters.\n" \
+                       "\tdocker run --rm -it No Data! bash :\tstarts a bash shell with the given parameters.\n" \
                        "\tdocker run --rm -it No Data! --version :\tdisplays the program version\n\n"
         self.assertEqual(expected_log, logging_stream.getvalue())
 

@@ -5,19 +5,8 @@
 FROM debian:stable-slim as builder
 
 # Install dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get update &&\
-    DEBIAN_FRONTEND=noninteractive apt-get upgrade -yqq
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt-get install bison \
-                    cdbs \
-                    curl \
-                    flex \
-                    g++ \
-                    git \
-                    python3 \
-                    vim \
-                    python3-pip \
-                    pkg-config -yqq
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yqq curl git python3 pkg-config binutils
 
 # Install depot_tools
 RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -32,16 +21,17 @@ RUN strip out/x64.release/d8
 # Build entrypoint package
 COPY . /build-entrypoint
 WORKDIR /build-entrypoint
-RUN pip install poetry &&\
+RUN apt-get install -yqq python3-pip &&\
+    pip install poetry &&\
     poetry build &&\
     cp -r dist /tmp/build-entrypoint &&\
-    cp install-package.sh /tmp/build-entrypoint/
+    cp install-package.sh /tmp/build-entrypoint/install-package.sh
 
 # ==============================================================================
 # Second stage build
 # ==============================================================================
 
-FROM debian:stable-slim
+FROM alpine:latest
 
 ARG DOCKER_MAINTAINER="Hamid Molareza <HamidMolareza@gmail.com>"
 LABEL maintainer="$DOCKER_MAINTAINER"
@@ -69,14 +59,14 @@ ENV DOCKER_NAME="$DOCKER_NAME"
 LABEL org.label-schema.description="Google V8 docker image"
 
 # Install dependencies
-RUN apt-get update && apt-get upgrade -yqq && \
-    DEBIAN_FRONTEND=noninteractive apt-get install curl rlwrap vim -yqq && \
-    apt-get clean && apt install python3-pip -y
+RUN apk update && \
+    apk add --no-cache curl rlwrap vim python3 bash
 
 # Install entrypoint
 COPY --from=builder /tmp/build-entrypoint /tmp/build-entrypoint
 WORKDIR /tmp/build-entrypoint
-RUN chmod +x install-package.sh &&\
+RUN apk add --no-cache py3-pip &&\
+    chmod +x install-package.sh &&\
     ./install-package.sh . &&\
     cd / && rm -r /tmp/build-entrypoint
 

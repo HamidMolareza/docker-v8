@@ -31,7 +31,7 @@ RUN apt-get install -yqq python3-pip &&\
 # Second stage build
 # ==============================================================================
 
-FROM alpine:latest
+FROM debian:stable-slim
 
 ARG DOCKER_MAINTAINER="Hamid Molareza <HamidMolareza@gmail.com>"
 LABEL maintainer="$DOCKER_MAINTAINER"
@@ -59,13 +59,13 @@ ENV DOCKER_NAME="$DOCKER_NAME"
 LABEL org.label-schema.description="Google V8 docker image"
 
 # Install dependencies
-RUN apk update && \
-    apk add --no-cache curl rlwrap vim python3 bash
+RUN apt-get update && apt-get upgrade -yqq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install curl rlwrap vim -yqq && apt-get clean
 
 # Install entrypoint
 COPY --from=builder /tmp/build-entrypoint /tmp/build-entrypoint
 WORKDIR /tmp/build-entrypoint
-RUN apk add --no-cache py3-pip &&\
+RUN apt-get install python3-pip -y &&\
     chmod +x install-package.sh &&\
     ./install-package.sh . &&\
     cd / && rm -r /tmp/build-entrypoint
